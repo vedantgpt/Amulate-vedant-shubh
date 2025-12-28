@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Voltway ERP - Imports &amp; Documents</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#595959",
+                "background-light": "#f7f7f7",
+                "background-dark": "#191919",
+                "volt-green": "#4A7A5E",
+                "volt-orange": "#D97706",
+                },
+                fontFamily: {
+                "display": ["Inter", "sans-serif"],
+                "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for industrial feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#141414] dark:text-white font-display overflow-hidden h-screen flex">
+<!-- Sidebar -->
+<aside class="w-64 bg-white dark:bg-[#242424] border-r border-[#e0e0e0] dark:border-[#333] flex flex-col flex-shrink-0 z-20">
+<div class="p-5 flex items-center gap-3">
+<div class="bg-primary/10 rounded-lg p-2">
+<span class="material-symbols-outlined text-primary dark:text-gray-200">bolt</span>
+</div>
+<div>
+<h1 class="text-[#141414] dark:text-white text-base font-bold leading-tight">Voltway ERP</h1>
+<p class="text-[#757575] dark:text-gray-400 text-xs font-normal">Hugo Agent Active</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-3 py-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#595959] dark:text-gray-300 hover:bg-background-light dark:hover:bg-[#333] group" href="#">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#595959] dark:text-gray-300 hover:bg-background-light dark:hover:bg-[#333] group" href="#">
+<span class="material-symbols-outlined text-[22px]">inventory_2</span>
+<span class="text-sm font-medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#595959] dark:text-gray-300 hover:bg-background-light dark:hover:bg-[#333] group" href="#">
+<span class="material-symbols-outlined text-[22px]">shopping_cart</span>
+<span class="text-sm font-medium">Procurement</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 dark:bg-primary/30 text-primary dark:text-white" href="#">
+<span class="material-symbols-outlined text-[22px] icon-filled">description</span>
+<span class="text-sm font-bold">Imports &amp; Docs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#595959] dark:text-gray-300 hover:bg-background-light dark:hover:bg-[#333] group" href="#">
+<span class="material-symbols-outlined text-[22px]">factory</span>
+<span class="text-sm font-medium">Production</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#595959] dark:text-gray-300 hover:bg-background-light dark:hover:bg-[#333] group" href="#">
+<span class="material-symbols-outlined text-[22px]">local_shipping</span>
+<span class="text-sm font-medium">Logistics</span>
+</a>
+</nav>
+<div class="p-4 border-t border-[#e0e0e0] dark:border-[#333]">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-9 bg-gray-200" data-alt="User profile picture placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB2OG0y0TZMS7M2wIA68L28CIApFpTKt1SDwzJGll2nc1ME-bsYQwEIl8jG3QWXw4mD4-axFOaJ89LVujnclmn47-CoBl-bscaZMJkR3fhEP0DXM5M52i5qPA1eUyUhKYhdUzYtgbLeYrfUjPdE_q67QHq8kHlDr-9NygMNWFxsX3xX2v0gPnn3HlOThJcxa8y9uulT9HKt05203XWuoIisUT1Pw2hBhAXIgRXG5MDjVzNP3Wp5aNpnchpf7p5gAbiAnMu3yGv7zEPs");'></div>
+<div class="flex flex-col">
+<p class="text-[#141414] dark:text-white text-sm font-medium">Marcus Chen</p>
+<p class="text-[#757575] dark:text-gray-400 text-xs">Head of Ops</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+<!-- Top Navbar -->
+<header class="h-16 flex items-center justify-between px-6 border-b border-[#e0e0e0] dark:border-[#333] bg-white dark:bg-[#242424] shrink-0">
+<h2 class="text-[#141414] dark:text-white text-lg font-bold tracking-tight">Imports &amp; Documents</h2>
+<div class="flex items-center gap-4">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757575] text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-background-light dark:bg-[#333] border-none rounded-lg text-sm text-[#141414] dark:text-white placeholder-[#757575] focus:ring-1 focus:ring-primary" placeholder="Search invoices, POs..." type="text"/>
+</div>
+<button class="p-2 text-[#595959] dark:text-gray-300 hover:bg-background-light dark:hover:bg-[#333] rounded-lg relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-volt-orange rounded-full border border-white dark:border-[#242424]"></span>
+</button>
+</div>
+</header>
+<!-- Scrollable Workspace -->
+<main class="flex-1 overflow-y-auto p-6 bg-background-light dark:bg-background-dark">
+<div class="max-w-[1600px] mx-auto h-full flex flex-col gap-6">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-[#141414] dark:text-white text-2xl font-bold tracking-tight">Data Ingestion Pipeline</h1>
+<p class="text-[#757575] dark:text-gray-400 text-sm mt-1 flex items-center gap-2">
+<span class="flex size-2 bg-green-500 rounded-full animate-pulse"></span>
+                            Hugo is currently processing 3 files. Review low confidence items.
+                        </p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary dark:text-white bg-white dark:bg-[#333] border border-[#e0e0e0] dark:border-[#444] rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-[#3a3a3a]">
+<span class="material-symbols-outlined text-[18px]">history</span>
+                            History
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md shadow-sm hover:bg-[#404040]">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                            Manual Entry
+                        </button>
+</div>
+</div>
+<!-- Main Grid Layout -->
+<div class="flex-1 grid grid-cols-12 gap-6 min-h-0">
+<!-- Left Column: Upload & Queue (40% width) -->
+<div class="col-span-12 lg:col-span-5 flex flex-col gap-6 h-full min-h-0">
+<!-- Upload Area (Compact) -->
+<div class="bg-white dark:bg-[#242424] rounded-lg border border-[#e0e0e0] dark:border-[#333] p-5">
+<div class="border-2 border-dashed border-[#e0e0e0] dark:border-[#444] rounded-lg p-8 flex flex-col items-center justify-center text-center gap-3 transition-colors hover:border-primary/50 hover:bg-background-light dark:hover:bg-[#2a2a2a] cursor-pointer group">
+<div class="bg-primary/10 p-3 rounded-full group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary dark:text-white text-3xl">cloud_upload</span>
+</div>
+<div>
+<p class="text-[#141414] dark:text-white font-medium text-sm">Click to upload or drag and drop</p>
+<p class="text-[#757575] dark:text-gray-400 text-xs mt-1">PDF, CSV, XLSX, PNG (max 10MB)</p>
+</div>
+</div>
+</div>
+<!-- Import Queue Table -->
+<div class="flex-1 bg-white dark:bg-[#242424] rounded-lg border border-[#e0e0e0] dark:border-[#333] flex flex-col min-h-0">
+<div class="px-5 py-4 border-b border-[#e0e0e0] dark:border-[#333] flex justify-between items-center bg-white dark:bg-[#242424] sticky top-0 rounded-t-lg z-10">
+<h3 class="font-bold text-[#141414] dark:text-white text-sm uppercase tracking-wider">Import Queue</h3>
+<span class="text-xs font-medium bg-gray-100 dark:bg-[#333] text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">5 items</span>
+</div>
+<div class="overflow-auto flex-1">
+<table class="w-full text-sm text-left">
+<thead class="text-xs text-[#757575] dark:text-gray-400 uppercase bg-background-light dark:bg-[#2a2a2a] sticky top-0">
+<tr>
+<th class="px-5 py-3 font-medium">File</th>
+<th class="px-5 py-3 font-medium w-24">Status</th>
+<th class="px-5 py-3 font-medium text-right">Conf.</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#e0e0e0] dark:divide-[#333]">
+<!-- Active Item (Selected) -->
+<tr class="bg-primary/5 dark:bg-primary/20 border-l-4 border-l-primary cursor-pointer hover:bg-gray-50 dark:hover:bg-[#2a2a2a]">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-volt-orange text-[20px]">image</span>
+<div>
+<p class="font-medium text-[#141414] dark:text-white truncate max-w-[140px]">Shipment_Manifest_Steel_22.png</p>
+<p class="text-xs text-[#757575] dark:text-gray-400">2 min ago</p>
+</div>
+</div>
+</td>
+<td class="px-5 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 border border-amber-200 dark:border-amber-800">
+                                                    Needs Review
+                                                </span>
+</td>
+<td class="px-5 py-4 text-right">
+<span class="font-mono font-bold text-amber-600 dark:text-amber-400">64%</span>
+</td>
+</tr>
+<!-- Completed Item -->
+<tr class="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] cursor-pointer transition-colors">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#757575] text-[20px]">picture_as_pdf</span>
+<div>
+<p class="font-medium text-[#141414] dark:text-white truncate max-w-[140px]">Inv_BattCell_Samsung_004.pdf</p>
+<p class="text-xs text-[#757575] dark:text-gray-400">5 min ago</p>
+</div>
+</div>
+</td>
+<td class="px-5 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800">
+                                                    Processed
+                                                </span>
+</td>
+<td class="px-5 py-4 text-right">
+<span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">98%</span>
+</td>
+</tr>
+<!-- Processing Item -->
+<tr class="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] cursor-pointer transition-colors">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#757575] text-[20px]">picture_as_pdf</span>
+<div>
+<p class="font-medium text-[#141414] dark:text-white truncate max-w-[140px]">PO_Lithium_092.pdf</p>
+<p class="text-xs text-[#757575] dark:text-gray-400">Just now</p>
+</div>
+</div>
+</td>
+<td class="px-5 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+<span class="size-1.5 bg-gray-500 rounded-full animate-bounce"></span>
+                                                    Ingesting
+                                                </span>
+</td>
+<td class="px-5 py-4 text-right">
+<span class="font-mono text-gray-400">--</span>
+</td>
+</tr>
+<!-- Completed Item -->
+<tr class="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] cursor-pointer transition-colors">
+<td class="px-5 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#757575] text-[20px]">picture_as_pdf</span>
+<div>
+<p class="font-medium text-[#141414] dark:text-white truncate max-w-[140px]">Inv_Logistics_DHL_Q3.pdf</p>
+<p class="text-xs text-[#757575] dark:text-gray-400">1 hour ago</p>
+</div>
+</div>
+</td>
+<td class="px-5 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800">
+                                                    Processed
+                                                </span>
+</td>
+<td class="px-5 py-4 text-right">
+<span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">96%</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column: Workspace Detail (60% width) -->
+<div class="col-span-12 lg:col-span-7 flex flex-col h-full min-h-0">
+<div class="bg-white dark:bg-[#242424] rounded-lg border border-[#e0e0e0] dark:border-[#333] shadow-sm flex flex-col h-full overflow-hidden">
+<!-- Detail Header -->
+<div class="px-6 py-4 border-b border-[#e0e0e0] dark:border-[#333] flex justify-between items-center bg-white dark:bg-[#242424]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-volt-orange">warning</span>
+<div>
+<h2 class="text-[#141414] dark:text-white font-bold text-base">Reviewing: Shipment_Manifest_Steel_22.png</h2>
+<p class="text-xs text-[#757575] dark:text-gray-400">Source: Email Attachment • Received Today 09:41 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-[#757575] dark:text-gray-400">Confidence:</span>
+<div class="h-2 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-volt-orange w-[64%]"></div>
+</div>
+<span class="text-xs font-bold text-volt-orange">64%</span>
+</div>
+</div>
+<!-- Detail Body (Split View) -->
+<div class="flex-1 flex min-h-0 flex-col md:flex-row">
+<!-- Document Preview -->
+<div class="flex-1 bg-[#1e1e1e] relative flex items-center justify-center p-8 overflow-hidden group">
+<!-- Zoom Controls Overlay -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#2a2a2a] rounded-full flex gap-2 px-3 py-1.5 shadow-lg border border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-gray-300 hover:text-white"><span class="material-symbols-outlined text-[20px]">remove</span></button>
+<button class="text-gray-300 hover:text-white"><span class="material-symbols-outlined text-[20px]">add</span></button>
+<div class="w-px h-5 bg-gray-600 mx-1"></div>
+<button class="text-gray-300 hover:text-white"><span class="material-symbols-outlined text-[20px]">fit_screen</span></button>
+</div>
+<img class="max-h-full max-w-full object-contain shadow-2xl opacity-90 rounded-sm" data-alt="Scanned manifest document showing tables and text" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkCNgnQEgHcR_57DNRo-26LgqtdloLlj_9epwDG2_GqwtrhoSOJsx2ha8CknKE2Xg1ZS_sJcyD9JDI0_ck0A3WY_wWCV18n66QsgsinploTHZ_YNbOj284YAK5OkupVzsTzIyhLtxmp7e83Sld4V10n6fWTnzVg_UphnYGVk7SDirFJiYs5gQIYQsld8cqIcTI8opub4Rfe4TYo6X5N4YPjkmrxJgPaR0C6eAro3ftPyn5TgQ6b_kQrTmH0ionMtPrkrSh8PU-O6XH"/>
+</div>
+<!-- Extraction Form -->
+<div class="w-full md:w-[400px] bg-white dark:bg-[#242424] border-l border-[#e0e0e0] dark:border-[#333] flex flex-col min-h-0">
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Section 1 -->
+<div class="space-y-4">
+<h4 class="text-xs font-bold uppercase text-[#757575] dark:text-gray-400 tracking-wider mb-2">Vendor Information</h4>
+<div class="space-y-1">
+<label class="block text-xs font-medium text-[#141414] dark:text-gray-300">Vendor Name</label>
+<div class="flex gap-2">
+<input class="flex-1 rounded border-gray-300 dark:border-[#444] bg-white dark:bg-[#1a1a1a] text-[#141414] dark:text-white text-sm focus:ring-primary focus:border-primary" type="text" value="SteelWorks Industrial Ltd."/>
+<div class="flex items-center justify-center size-9 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800" title="High Confidence">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+</div>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-medium text-[#141414] dark:text-gray-300">Invoice / PO Number</label>
+<div class="flex gap-2">
+<input class="flex-1 font-mono rounded border-gray-300 dark:border-[#444] bg-white dark:bg-[#1a1a1a] text-[#141414] dark:text-white text-sm focus:ring-primary focus:border-primary" type="text" value="PO-992-KXL"/>
+<div class="flex items-center justify-center size-9 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+</div>
+</div>
+</div>
+<hr class="border-[#e0e0e0] dark:border-[#333]"/>
+<!-- Section 2: Low Confidence Area -->
+<div class="space-y-4 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-lg">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-500 text-[18px]">warning</span>
+<h4 class="text-xs font-bold uppercase text-amber-800 dark:text-amber-500 tracking-wider">Review Required</h4>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-medium text-[#141414] dark:text-gray-300">Total Weight (kg)</label>
+<div class="flex gap-2">
+<input class="flex-1 font-mono rounded border-amber-300 dark:border-amber-700 bg-white dark:bg-[#1a1a1a] text-[#141414] dark:text-white text-sm focus:ring-amber-500 focus:border-amber-500" type="text" value="4,500.00"/>
+<div class="flex items-center justify-center size-9 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800" title="Low Confidence - Please Verify">
+<span class="material-symbols-outlined text-[18px]">priority_high</span>
+</div>
+</div>
+<p class="text-[10px] text-amber-700 dark:text-amber-500">Hugo detected potential blur on digit.</p>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-medium text-[#141414] dark:text-gray-300">Delivery Date</label>
+<div class="flex gap-2">
+<input class="flex-1 rounded border-gray-300 dark:border-[#444] bg-white dark:bg-[#1a1a1a] text-[#141414] dark:text-white text-sm focus:ring-primary focus:border-primary" type="text" value="12/05/2024"/>
+<div class="flex items-center justify-center size-9 rounded bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 3 -->
+<div class="space-y-4">
+<div class="space-y-1">
+<label class="block text-xs font-medium text-[#141414] dark:text-gray-300">Detected Line Items</label>
+<div class="border border-gray-200 dark:border-[#444] rounded-md overflow-hidden">
+<div class="bg-gray-50 dark:bg-[#333] px-3 py-2 text-xs font-medium border-b border-gray-200 dark:border-[#444] grid grid-cols-4">
+<span class="col-span-2">Item</span>
+<span class="text-right">Qty</span>
+<span class="text-right">Price</span>
+</div>
+<div class="px-3 py-2 text-xs grid grid-cols-4 border-b border-gray-100 dark:border-[#444]">
+<span class="col-span-2 text-[#141414] dark:text-white">Steel Sheets 4x8</span>
+<span class="text-right font-mono text-gray-600 dark:text-gray-400">50</span>
+<span class="text-right font-mono text-gray-600 dark:text-gray-400">$120</span>
+</div>
+<div class="px-3 py-2 text-xs grid grid-cols-4">
+<span class="col-span-2 text-[#141414] dark:text-white">Alloy Rods</span>
+<span class="text-right font-mono text-gray-600 dark:text-gray-400">200</span>
+<span class="text-right font-mono text-gray-600 dark:text-gray-400">$15</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="p-6 border-t border-[#e0e0e0] dark:border-[#333] bg-gray-50 dark:bg-[#2a2a2a] flex gap-3">
+<button class="flex-1 py-2.5 px-4 rounded-md border border-gray-300 dark:border-[#555] text-[#141414] dark:text-white font-medium text-sm hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors">
+                                            Report Error
+                                        </button>
+<button class="flex-1 py-2.5 px-4 rounded-md bg-primary text-white font-bold text-sm shadow-md hover:bg-[#404040] transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+                                            Confirm Data
+                                        </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

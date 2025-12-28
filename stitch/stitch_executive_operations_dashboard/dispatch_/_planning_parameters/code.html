@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Voltway ERP - Dispatch Parameters</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#595959",
+                        "background-light": "#f7f7f7",
+                        "background-dark": "#191919",
+                        "accent-blue": "#2563EB",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        /* Custom scrollbar for table/main content to keep it clean */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display h-screen flex overflow-hidden antialiased">
+<!-- Sidebar Navigation -->
+<aside class="w-64 bg-white dark:bg-[#202020] border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+<!-- Logo & Nav -->
+<div class="flex flex-col">
+<div class="h-16 flex items-center px-6 border-b border-slate-100 dark:border-slate-800">
+<div class="size-8 bg-primary rounded flex items-center justify-center text-white mr-3 shadow-md shadow-primary/20">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<span class="font-bold text-lg tracking-tight text-[#141414] dark:text-white">Voltway ERP</span>
+</div>
+<nav class="p-4 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded group transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded group transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+<span class="text-sm font-medium">Procurement</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary dark:text-white rounded group border-l-4 border-primary shadow-sm" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="text-sm font-semibold">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded group transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">precision_manufacturing</span>
+<span class="text-sm font-medium">Manufacturing</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded group transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+<span class="text-sm font-medium">Logistics</span>
+</a>
+</nav>
+</div>
+<!-- User Profile -->
+<div class="p-4 border-t border-slate-100 dark:border-slate-800">
+<button class="flex items-center gap-3 w-full hover:bg-slate-50 dark:hover:bg-slate-800 p-2 rounded transition-colors text-left">
+<div class="size-9 rounded-full bg-slate-200 bg-cover bg-center shadow-inner" data-alt="User profile picture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDdzCGk4VV5XKI2__s3f7ZLHoEguNqe4VZ4COHTdD_KYDcvLZEBSTwo1eNJSG4MfeeoPqddhtMoJx_qO1xnboVMjIIqDL2BayW0DRqpiaHJF_sQxwWXsctZOz3dA822rdqBM6f7ly-_5jD4Ty8VCd3Ef6NsxME0zarycLbTzjlvnERHhmjtfH_gWuMHQmTMzYLRBZet0gbm-MfkZruYRtkG50XdcRr0qYqO4N4HACFaWImtJnxFjiNXww4fJHWaQkorwZoyLrUdRFQN');"></div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-[#141414] dark:text-white">Alex Chen</span>
+<span class="text-xs text-slate-500">Ops Manager</span>
+</div>
+<span class="material-symbols-outlined ml-auto text-slate-400 text-[18px]">expand_more</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-full relative overflow-hidden">
+<!-- Top Header -->
+<header class="h-16 bg-white dark:bg-[#202020] border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 z-10">
+<!-- Breadcrumbs -->
+<div class="flex items-center text-sm text-slate-500 dark:text-slate-400">
+<a class="hover:text-primary transition-colors" href="#">Voltway ERP</a>
+<span class="mx-2 text-slate-300 dark:text-slate-600">/</span>
+<a class="hover:text-primary transition-colors" href="#">Inventory</a>
+<span class="mx-2 text-slate-300 dark:text-slate-600">/</span>
+<span class="text-primary dark:text-white font-semibold">Planning</span>
+</div>
+<!-- Header Actions -->
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px] group-focus-within:text-primary transition-colors">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded text-sm focus:ring-2 focus:ring-primary/20 focus:bg-white dark:focus:bg-slate-900 transition-all w-64 placeholder:text-slate-400" placeholder="Search..." type="text"/>
+</div>
+<div class="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded relative transition-colors">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-[#202020]"></span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex-1 overflow-y-auto p-6 lg:p-8 scrollbar-hide bg-background-light dark:bg-background-dark">
+<div class="max-w-[1400px] mx-auto flex flex-col gap-6">
+<!-- Page Title & Primary Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-1">
+<h1 class="text-3xl font-black tracking-tight text-[#141414] dark:text-white leading-tight">Dispatch / Planning Parameters</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base">Manage inventory control logic and AI thresholds.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#202020] border border-slate-200 dark:border-slate-700 rounded text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-sm transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                            Export
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-semibold hover:bg-[#404040] shadow-md shadow-primary/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                            Save Parameters
+                        </button>
+</div>
+</div>
+<!-- Filter Toolbar -->
+<div class="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-[#202020] p-4 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm gap-4">
+<div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+<div class="relative w-full max-w-lg group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">filter_list</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Filter by SKU, Part Number, or Description" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[18px]">tune</span> Advanced
+                        </button>
+<div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>
+<button class="px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[18px]">play_circle</span> Simulate Changes
+                        </button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="bg-white dark:bg-[#202020] rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
+<th class="py-3 px-4 w-12 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary focus:ring-offset-0 bg-transparent cursor-pointer" type="checkbox"/>
+</th>
+<th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-500">SKU / Description</th>
+<th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-500 w-24">UoM</th>
+<th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-500 w-32 text-right">Reorder Pt</th>
+<th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-500 w-32 text-right">Safety Stock</th>
+<th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-500 w-32 text-right">Lot Size</th>
+<th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-500 w-32 text-center">Auto-Reorder</th>
+<th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-500 w-40 text-right">Hugo Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary focus:ring-offset-0 bg-transparent cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-bold text-[#141414] dark:text-white text-sm font-mono">SKU-001</span>
+<span class="text-xs text-slate-500 mt-0.5">Motor Controller Unit v2</span>
+</div>
+</td>
+<td class="py-4 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">PCS</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="50"/>
+</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="10"/>
+</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="100"/>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="relative w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="py-4 px-4 text-right">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-xs font-bold border border-green-200 dark:border-green-800">
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+<span>Optimal</span>
+</div>
+</td>
+</tr>
+<!-- Row 2 (With AI Insight Recommendation) -->
+<tr class="bg-blue-50/40 dark:bg-blue-900/10 group hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-l-4 border-l-blue-500">
+<td class="py-4 px-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary focus:ring-offset-0 bg-transparent cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-bold text-[#141414] dark:text-white text-sm font-mono">SKU-002</span>
+<span class="text-xs text-slate-500 mt-0.5">Li-Ion Battery Cell 2170</span>
+</div>
+</td>
+<td class="py-4 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">PCS</td>
+<td class="py-4 px-4">
+<div class="relative">
+<input class="w-full px-2 py-1.5 text-sm bg-white dark:bg-slate-900 border border-blue-300 dark:border-blue-700 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-right font-bold text-blue-700 dark:text-blue-400 shadow-sm" type="number" value="500"/>
+<div class="absolute -bottom-5 right-0 text-[10px] text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-0.5 whitespace-nowrap">
+<span class="material-symbols-outlined text-[10px]">trending_up</span> Rec: 650
+                                            </div>
+</div>
+</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="200"/>
+</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="1000"/>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="relative w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="py-4 px-4 text-right">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-full text-xs font-bold border border-amber-200 dark:border-amber-800 cursor-help" title="Hugo suggests review">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+<span>Review</span>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary focus:ring-offset-0 bg-transparent cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-bold text-[#141414] dark:text-white text-sm font-mono">SKU-003</span>
+<span class="text-xs text-slate-500 mt-0.5">Aluminum Chassis Frame</span>
+</div>
+</td>
+<td class="py-4 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">PCS</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="15"/>
+</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="5"/>
+</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="20"/>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="relative w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="py-4 px-4 text-right">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-xs font-bold border border-green-200 dark:border-green-800">
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+<span>Optimal</span>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary focus:ring-offset-0 bg-transparent cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-bold text-[#141414] dark:text-white text-sm font-mono">SKU-004</span>
+<span class="text-xs text-slate-500 mt-0.5">M6 Stainless Bolt</span>
+</div>
+</td>
+<td class="py-4 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">BOX</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="100"/>
+</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="20"/>
+</td>
+<td class="py-4 px-4">
+<input class="w-full px-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium text-slate-700 dark:text-slate-200" type="number" value="500"/>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="relative w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</td>
+<td class="py-4 px-4 text-right">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-xs font-bold border border-green-200 dark:border-green-800">
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+<span>Optimal</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="px-4 py-3 bg-slate-50 dark:bg-[#1a1a1a] border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Showing 1-4 of 1,204 items</span>
+<div class="flex gap-2">
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 hover:text-primary hover:border-primary transition-colors"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 hover:text-primary hover:border-primary transition-colors"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+</div>
+</div>
+</div>
+<!-- Bottom Section: Impact & AI Insights -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-6">
+<!-- Impact Analysis Card -->
+<div class="lg:col-span-2 bg-white dark:bg-[#202020] rounded-lg border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-5">
+<div class="flex items-center gap-2">
+<div class="size-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+</div>
+<h3 class="font-bold text-[#141414] dark:text-white">Predicted Impact Analysis</h3>
+</div>
+<span class="text-xs font-medium text-slate-400">Updates in real-time</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+<div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-800">
+<p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Projected Holding Cost</p>
+<div class="flex items-end gap-3">
+<span class="text-3xl font-black text-[#141414] dark:text-white tracking-tight">$42,500</span>
+<span class="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded font-bold mb-1 flex items-center gap-1 border border-red-100 dark:border-red-800">
+                                            +$450/mo <span class="material-symbols-outlined text-[14px]">trending_up</span>
+</span>
+</div>
+<p class="text-xs text-slate-400 mt-2">Based on current ROP changes</p>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-800">
+<p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Service Level Risk</p>
+<div class="flex items-end gap-3">
+<span class="text-3xl font-black text-[#141414] dark:text-white tracking-tight">99.4%</span>
+<span class="text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded font-bold mb-1 flex items-center gap-1 border border-green-100 dark:border-green-800">
+                                            +0.2% <span class="material-symbols-outlined text-[14px]">trending_up</span>
+</span>
+</div>
+<p class="text-xs text-slate-400 mt-2">Improved stock availability</p>
+</div>
+</div>
+</div>
+<div class="p-3 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/10 text-sm text-slate-700 dark:text-slate-300 rounded-r">
+<span class="font-bold text-blue-700 dark:text-blue-400">Simulation:</span> Increasing Safety Stock for <span class="font-bold">SKU-002</span> will directly impact 3 active production orders scheduled for next week.
+                        </div>
+</div>
+<!-- Hugo's Insights Card -->
+<div class="bg-gradient-to-br from-slate-800 to-slate-950 text-white rounded-lg p-6 shadow-xl relative overflow-hidden flex flex-col justify-between border border-slate-700">
+<!-- Decorative Background -->
+<div class="absolute top-[-20px] right-[-20px] opacity-10 rotate-12 pointer-events-none">
+<span class="material-symbols-outlined text-[180px]">psychology</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-blue-400 text-[24px]">auto_awesome</span>
+<h3 class="font-bold uppercase tracking-widest text-xs text-blue-300">Hugo's Insights</h3>
+</div>
+<div class="mb-6">
+<p class="text-[15px] leading-relaxed text-slate-200 font-medium">
+                                    "I recommend increasing <span class="text-white font-bold border-b border-white/30">Lot Size</span> for <span class="text-white font-bold">SKU-001</span> to 150. My analysis detects a high probability of shipping delays in Q3 from the supplier in Southeast Asia."
+                                </p>
+</div>
+</div>
+<button class="relative z-10 w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group">
+                            Apply Recommendation
+                            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

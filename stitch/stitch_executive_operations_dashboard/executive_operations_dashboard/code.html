@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Voltway Executive Operations Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#595959",
+                        "background-light": "#f7f7f7",
+                        "background-dark": "#191919",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#262626",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#404040",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen overflow-hidden flex">
+<!-- Sidebar -->
+<aside class="w-64 h-screen bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark flex flex-col flex-shrink-0 z-20 transition-colors duration-300">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary aspect-square rounded size-8 flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[20px]">electric_scooter</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-sm font-bold tracking-tight uppercase text-slate-900 dark:text-white">Voltway ERP</h1>
+<p class="text-xs text-slate-500 dark:text-slate-400">Ops Command</p>
+</div>
+</div>
+<nav class="flex-1 px-4 flex flex-col gap-1 overflow-y-auto">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded bg-primary/10 text-primary dark:text-white font-medium group" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="text-sm">Procurement</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-sm">Inventory</span>
+<span class="ml-auto bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-[10px] font-bold px-1.5 py-0.5 rounded">3</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-sm">Logistics</span>
+</a>
+<div class="pt-4 pb-2">
+<p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Intelligence</p>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group" href="#">
+<span class="material-symbols-outlined text-indigo-500 dark:text-indigo-400">smart_toy</span>
+<span class="text-sm">AI Agent (Hugo)</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-sm">Reports</span>
+</a>
+</nav>
+<div class="p-4 border-t border-border-light dark:border-border-dark mt-auto">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors group mb-2" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+<div class="flex items-center gap-3 px-3 pt-2">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center" data-alt="User profile picture of executive" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDkIwLhuSWwbqw0OfZjiNW5kF4Yle6hjZHSIqQYZOwDpQZx500V81x4qvypdaNYPcMY7masrDa1mu-Pae0KEq1sG8Ef34IpHwXTPfl8c64xeK-19Y6FZ4FWll0WvU_d0NzFlCNBKI1VZyM3lAuiJiYcYs8Gie5kgfGIPCNja6xMK--CvlSJdBbgzATKXDsjiER-BiqCKSI31TzR83hHis7loSG1lcbGgw8gCW8uV6RaYwPQwtNvj_o4N6xTdwLfbN3F1wVkbCCrk1Mz');"></div>
+<div class="flex flex-col">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Alex Chen</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">VP Operations</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 h-screen overflow-y-auto bg-background-light dark:bg-background-dark flex flex-col">
+<!-- Top Header -->
+<header class="h-16 bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark flex items-center justify-between px-8 sticky top-0 z-10">
+<div class="flex items-center gap-4">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Executive Operations Dashboard</h2>
+<div class="h-4 w-px bg-slate-200 dark:bg-slate-700"></div>
+<div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[16px]">calendar_today</span>
+<span>Oct 24, 2023</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-[20px]">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded text-sm w-64 focus:ring-2 focus:ring-primary/20 text-slate-900 dark:text-white placeholder-slate-500" placeholder="Search orders, SKUs..." type="text"/>
+</div>
+<button class="relative p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 size-2 bg-red-500 rounded-full border-2 border-surface-light dark:border-surface-dark"></span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<div class="p-8 max-w-[1600px] w-full mx-auto space-y-6">
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<div class="bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark p-5 shadow-sm relative overflow-hidden group">
+<div class="flex justify-between items-start mb-2">
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Daily Build Rate</p>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600 group-hover:text-primary transition-colors">precision_manufacturing</span>
+</div>
+<div class="flex items-end gap-2">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white">142</h3>
+<span class="text-xs text-green-600 dark:text-green-400 font-medium mb-1 flex items-center bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> 5%
+                        </span>
+</div>
+<p class="text-xs text-slate-400 mt-2">Target: 135 units</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-light dark:bg-surface-dark rounded border border-l-4 border-l-red-500 border-y-border-light border-r-border-light dark:border-y-border-dark dark:border-r-border-dark p-5 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Active Stockouts</p>
+<span class="material-symbols-outlined text-red-500">warning</span>
+</div>
+<div class="flex items-end gap-2">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white">3</h3>
+<span class="text-xs text-red-600 dark:text-red-400 font-medium mb-1 flex items-center bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded">
+                            Critical
+                        </span>
+</div>
+<p class="text-xs text-slate-400 mt-2">Requires immediate attention</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark p-5 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">On-Time Delivery</p>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600">local_shipping</span>
+</div>
+<div class="flex items-end gap-2">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white">94.5%</h3>
+<span class="text-xs text-red-600 dark:text-red-400 font-medium mb-1 flex items-center bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span> 2.1%
+                        </span>
+</div>
+<p class="text-xs text-slate-400 mt-2">Last 30 days avg</p>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark p-5 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Cash Flow Projection</p>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600">payments</span>
+</div>
+<div class="flex items-end gap-2">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white">+$1.2M</h3>
+<span class="text-xs text-green-600 dark:text-green-400 font-medium mb-1 flex items-center bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 8%
+                        </span>
+</div>
+<p class="text-xs text-slate-400 mt-2">Next 7 days forecast</p>
+</div>
+</div>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column (2/3 width) -->
+<div class="lg:col-span-2 space-y-6">
+<!-- Production Capacity Section -->
+<section class="bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark shadow-sm">
+<div class="px-5 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center">
+<h3 class="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Production Capacity (Today)</h3>
+<button class="text-xs text-primary hover:underline">View Detailed Schedule</button>
+</div>
+<div class="p-5 flex flex-col gap-6">
+<!-- Model 1 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-slate-900 dark:text-white">Voltway X1 Model</span>
+<span class="text-xs text-slate-500">Standard Range</span>
+</div>
+<div class="text-right">
+<span class="text-sm font-bold text-slate-900 dark:text-white">85</span>
+<span class="text-sm text-slate-500">/ 100 Units</span>
+</div>
+</div>
+<div class="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 85%"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs font-medium text-green-600 dark:text-green-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> On Track
+                                    </span>
+<span class="text-xs text-slate-400">85% Capacity</span>
+</div>
+</div>
+<!-- Model 2 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-slate-900 dark:text-white">Urban Glide Pro</span>
+<span class="text-xs text-slate-500">Long Range</span>
+</div>
+<div class="text-right">
+<span class="text-sm font-bold text-slate-900 dark:text-white">42</span>
+<span class="text-sm text-slate-500">/ 60 Units</span>
+</div>
+</div>
+<div class="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-amber-500 rounded-full" style="width: 70%"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Behind Schedule (-1h)
+                                    </span>
+<span class="text-xs text-slate-400">70% Capacity</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Logistics Timeline -->
+<section class="bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark shadow-sm flex-1">
+<div class="px-5 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center">
+<h3 class="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Incoming Logistics (Next 7 Days)</h3>
+<div class="flex gap-2">
+<button class="size-6 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<button class="size-6 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm whitespace-nowrap">
+<thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-border-light dark:border-border-dark">
+<tr>
+<th class="px-5 py-3 font-medium text-xs uppercase tracking-wider">Shipment ID</th>
+<th class="px-5 py-3 font-medium text-xs uppercase tracking-wider">Supplier</th>
+<th class="px-5 py-3 font-medium text-xs uppercase tracking-wider">Contents</th>
+<th class="px-5 py-3 font-medium text-xs uppercase tracking-wider">ETA</th>
+<th class="px-5 py-3 font-medium text-xs uppercase tracking-wider">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-light dark:divide-border-dark">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-5 py-3 font-mono text-slate-700 dark:text-slate-300">#SHP-4092</td>
+<td class="px-5 py-3 text-slate-900 dark:text-white font-medium">Panasonic</td>
+<td class="px-5 py-3 text-slate-600 dark:text-slate-400">Battery Cells (20k)</td>
+<td class="px-5 py-3 text-slate-600 dark:text-slate-400">Tomorrow, 09:00</td>
+<td class="px-5 py-3">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+<span class="size-1.5 rounded-full bg-blue-500"></span> In Transit
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-5 py-3 font-mono text-slate-700 dark:text-slate-300">#SHP-3321</td>
+<td class="px-5 py-3 text-slate-900 dark:text-white font-medium">Bosch</td>
+<td class="px-5 py-3 text-slate-600 dark:text-slate-400">ABS Controllers</td>
+<td class="px-5 py-3 text-slate-600 dark:text-slate-400">Oct 26, 14:00</td>
+<td class="px-5 py-3">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+<span class="size-1.5 rounded-full bg-amber-500"></span> Delayed (Customs)
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-5 py-3 font-mono text-slate-700 dark:text-slate-300">#SHP-4100</td>
+<td class="px-5 py-3 text-slate-900 dark:text-white font-medium">Magura</td>
+<td class="px-5 py-3 text-slate-600 dark:text-slate-400">Brake Calipers</td>
+<td class="px-5 py-3 text-slate-600 dark:text-slate-400">Oct 27, 08:30</td>
+<td class="px-5 py-3">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+<span class="size-1.5 rounded-full bg-slate-400"></span> Scheduled
+                                            </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Right Column (1/3 width) -->
+<div class="space-y-6">
+<!-- Critical Alerts -->
+<section class="bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark shadow-sm">
+<div class="px-5 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-red-50 dark:bg-red-900/10">
+<h3 class="text-sm font-bold uppercase tracking-wide text-red-700 dark:text-red-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">gpp_maybe</span> Critical Alerts
+                            </h3>
+<span class="bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200 text-xs font-bold px-2 py-0.5 rounded-full">3</span>
+</div>
+<div class="divide-y divide-border-light dark:divide-border-dark">
+<!-- Alert 1 -->
+<div class="p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<div class="flex gap-3">
+<div class="text-indigo-600 dark:text-indigo-400 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">smart_toy</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Brake Caliper Supply Low</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                            Predicted stockout in <span class="font-bold text-red-600 dark:text-red-400">3 days</span> based on current build rate.
+                                        </p>
+<div class="mt-2">
+<button class="text-xs font-medium bg-primary text-white px-3 py-1.5 rounded hover:bg-slate-700 transition-colors">Contact Supplier</button>
+<button class="text-xs font-medium text-primary dark:text-slate-300 px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-1">Ignore</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Alert 2 -->
+<div class="p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<div class="flex gap-3">
+<div class="text-red-500 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">error</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Line 2 Stoppage</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">
+                                            Hydraulic press malfunction detected. Maintenance dispatched.
+                                        </p>
+<span class="text-[10px] text-slate-400 mt-1">14 mins ago</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Inventory Health -->
+<section class="bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark shadow-sm">
+<div class="px-5 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center">
+<h3 class="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Inventory Health</h3>
+<button class="text-slate-400 hover:text-primary dark:hover:text-white">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</div>
+<div class="p-4 space-y-4">
+<!-- Item -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] text-slate-500">battery_charging_full</span>
+</div>
+<div>
+<p class="text-sm font-medium text-slate-900 dark:text-white">Battery Packs</p>
+<p class="text-xs text-slate-500">4,200 units</p>
+</div>
+</div>
+<span class="px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Healthy</span>
+</div>
+<!-- Item -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] text-slate-500">tire_repair</span>
+</div>
+<div>
+<p class="text-sm font-medium text-slate-900 dark:text-white">Tires (10")</p>
+<p class="text-xs text-slate-500">850 units</p>
+</div>
+</div>
+<span class="px-2 py-1 rounded text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Low</span>
+</div>
+<!-- Item -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] text-slate-500">memory</span>
+</div>
+<div>
+<p class="text-sm font-medium text-slate-900 dark:text-white">Motor Controllers</p>
+<p class="text-xs text-slate-500">120 units</p>
+</div>
+</div>
+<span class="px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Critical</span>
+</div>
+</div>
+</section>
+<!-- System Status Mini Table -->
+<section class="bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark shadow-sm p-4">
+<h4 class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-3">System Status</h4>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+<span class="size-2 rounded-full bg-green-500"></span> ERP Sync
+                                </span>
+<span class="text-slate-900 dark:text-white font-mono text-xs">2 mins ago</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+<span class="size-2 rounded-full bg-green-500"></span> Supplier API
+                                </span>
+<span class="text-green-600 dark:text-green-400 text-xs font-medium">Connected</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+<span class="size-2 rounded-full bg-amber-500"></span> Logistics Feed
+                                </span>
+<span class="text-amber-600 dark:text-amber-400 text-xs font-medium">Degraded</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+</body></html>

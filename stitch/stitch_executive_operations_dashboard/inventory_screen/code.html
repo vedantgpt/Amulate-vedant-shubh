@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Voltway Inventory ERP</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#595959",
+                        "background-light": "#f7f7f7",
+                        "background-dark": "#191919",
+                        "volt-red": "#DC2626",
+                        "volt-green": "#16A34A",
+                        "volt-amber": "#D97706",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-primary overflow-hidden h-screen flex">
+<!-- Sidebar -->
+<aside class="w-64 h-full bg-white border-r border-gray-200 flex flex-col shrink-0 transition-all duration-300 z-20">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary aspect-square rounded-lg size-10 flex items-center justify-center text-white font-bold text-xl">
+                V
+            </div>
+<div class="flex flex-col">
+<h1 class="text-primary text-base font-bold leading-tight">Voltway</h1>
+<p class="text-gray-500 text-xs font-normal">ERP v2.0</p>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-gray-500 group-hover:text-primary">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined fill-1">inventory_2</span>
+<span class="text-sm font-medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-gray-500 group-hover:text-primary">shopping_cart</span>
+<span class="text-sm font-medium">Procurement</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-gray-500 group-hover:text-primary">factory</span>
+<span class="text-sm font-medium">Manufacturing</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-gray-500 group-hover:text-primary">local_shipping</span>
+<span class="text-sm font-medium">Logistics</span>
+</a>
+<div class="pt-4 pb-2 px-3">
+<p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Intelligence</p>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-purple-600 group-hover:text-purple-700">auto_awesome</span>
+<span class="text-sm font-medium">AI Insights</span>
+<span class="ml-auto bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full">HUGO</span>
+</a>
+</nav>
+<div class="p-4 border-t border-gray-200">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-full bg-gray-200 bg-cover bg-center" data-alt="User profile picture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrlHZrHjjjqLN46AkJib9c2sa_fRRFIUd1sq2YXRX1n8IkNvAZAqRy9PsnQgG1wWbesbHLX70oRJACU7RSBFqfmoR5Wn4W-ZNOcm3_dHdvhc9b3819hvCMMhY_MaMXFzRr7y1PITfrn5S-vhXLisb85aWHSyItGlaw0km8Wb5yBfvMOCbJwStKUjsa9XfUTQPMCkznbX1gtvOVo81BzozgUHCK5GCgoUbgNdZG3rW33jsy1bAEyDQbRPb5X0e0HnL-j-YoujIFEbiR');"></div>
+<div class="flex flex-col min-w-0">
+<p class="text-sm font-medium text-gray-900 truncate">Alex Chen</p>
+<p class="text-xs text-gray-500 truncate">Ops Manager</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+<!-- Top Header -->
+<header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shrink-0 h-16">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 text-sm">
+<span class="text-gray-500">Dashboard</span>
+<span class="material-symbols-outlined text-gray-400 text-base">chevron_right</span>
+<span class="font-semibold text-primary">Inventory Management</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<button class="flex items-center justify-center size-9 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors relative">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-volt-red rounded-full border-2 border-white"></span>
+</button>
+</div>
+<button class="flex items-center justify-center size-9 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+</button>
+<div class="h-6 w-px bg-gray-200 mx-1"></div>
+<button class="flex items-center justify-center size-9 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+<span class="material-symbols-outlined text-[22px]">help</span>
+</button>
+</div>
+</header>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto p-6 scrollbar-hide">
+<div class="max-w-[1400px] mx-auto flex flex-col gap-6">
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Total Value -->
+<div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-1">
+<div class="flex justify-between items-start">
+<p class="text-gray-500 text-sm font-medium">Total Value</p>
+<span class="bg-green-50 text-volt-green text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> 2.4%
+                            </span>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 tracking-tight">$4.2M</h3>
+<p class="text-xs text-gray-400 mt-1">Across all warehouses</p>
+</div>
+<!-- Critical Stockouts -->
+<div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-1 relative overflow-hidden">
+<div class="absolute right-0 top-0 h-full w-1 bg-volt-red"></div>
+<div class="flex justify-between items-start">
+<p class="text-gray-500 text-sm font-medium">Critical Stockouts</p>
+<span class="bg-red-50 text-volt-red text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1">
+                                +3 items
+                            </span>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 tracking-tight">12 SKUs</h3>
+<p class="text-xs text-volt-red mt-1 font-medium">Immediate action required</p>
+</div>
+<!-- Overstocked -->
+<div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-1">
+<div class="flex justify-between items-start">
+<p class="text-gray-500 text-sm font-medium">Overstocked</p>
+<span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1">
+                                -5 items
+                            </span>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 tracking-tight">45 SKUs</h3>
+<p class="text-xs text-gray-400 mt-1">&gt;180 days aging</p>
+</div>
+<!-- Turnover Rate -->
+<div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-1">
+<div class="flex justify-between items-start">
+<p class="text-gray-500 text-sm font-medium">Turnover Rate</p>
+<span class="bg-green-50 text-volt-green text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> 1.2%
+                            </span>
+</div>
+<h3 class="text-2xl font-bold text-gray-900 tracking-tight">High</h3>
+<p class="text-xs text-gray-400 mt-1">Efficient flow</p>
+</div>
+</div>
+<!-- AI Alert Banner -->
+<div class="bg-gradient-to-r from-purple-50 to-white border border-purple-100 rounded-lg p-4 flex items-start gap-3 shadow-sm">
+<div class="bg-purple-100 p-2 rounded-full shrink-0">
+<span class="material-symbols-outlined text-purple-600">auto_awesome</span>
+</div>
+<div class="flex flex-col flex-1">
+<h4 class="text-sm font-bold text-gray-900">Hugo Suggestion</h4>
+<p class="text-sm text-gray-600 mt-0.5">Projected demand for <strong>Brake Calipers (SKU-992)</strong> in Q4 suggests a potential stockout. Recommended reorder: 5,000 units by next Friday.</p>
+</div>
+<div class="flex items-center gap-2 shrink-0 self-center">
+<button class="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded border border-gray-200 bg-white">Dismiss</button>
+<button class="px-3 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-gray-800 rounded shadow-sm">Review Order</button>
+</div>
+</div>
+<!-- Main Table Section -->
+<div class="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm flex-1 min-h-[600px]">
+<!-- Toolbar -->
+<div class="p-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center flex-1 max-w-lg relative">
+<div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder-gray-400 transition-shadow" placeholder="Ask Hugo or search SKUs, name, category..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<div class="relative group">
+<button class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                                    Filters
+                                </button>
+</div>
+<div class="h-8 w-px bg-gray-200 mx-1"></div>
+<button class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                                Export
+                            </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-gray-700 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                                Add Item
+                            </button>
+</div>
+</div>
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-50/50 border-b border-gray-200">
+<th class="py-3 px-4 w-12">
+<input class="rounded border-gray-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</th>
+<th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU Details</th>
+<th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+<th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+<th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-1/4">Stock Level</th>
+<th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Aging</th>
+<th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+<th class="py-3 px-4 w-10"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 text-sm">
+<!-- Row 1: Critical -->
+<tr class="group hover:bg-gray-50 transition-colors cursor-pointer">
+<td class="py-3 px-4 align-middle">
+<input class="rounded border-gray-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col">
+<span class="font-semibold text-gray-900">VT-8821</span>
+<span class="text-xs text-gray-500">Lithium-Ion Cell 21700</span>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                            Battery
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">Warehouse A</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col gap-1.5 w-full max-w-[200px]">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-gray-900">120 Avail</span>
+<span class="text-gray-400">/ 5000 Max</span>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-volt-red h-1.5 rounded-full" style="width: 5%"></div>
+</div>
+<div class="flex gap-2 text-[10px] text-gray-400">
+<span>Reserved: 2,500</span>
+<span>Blocked: 0</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-green-500"></span> 2 days
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-volt-red border border-red-100">
+<span class="material-symbols-outlined text-[14px]">warning</span> Critical
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-right">
+<button class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Healthy -->
+<tr class="group hover:bg-gray-50 transition-colors cursor-pointer">
+<td class="py-3 px-4 align-middle">
+<input class="rounded border-gray-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col">
+<span class="font-semibold text-gray-900">VT-4402</span>
+<span class="text-xs text-gray-500">Alloy Chassis Frame</span>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                            Frame
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">Warehouse B</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col gap-1.5 w-full max-w-[200px]">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-gray-900">850 Avail</span>
+<span class="text-gray-400">/ 1200 Max</span>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-1.5 rounded-full" style="width: 70%"></div>
+</div>
+<div class="flex gap-2 text-[10px] text-gray-400">
+<span>Reserved: 50</span>
+<span>Blocked: 2</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-green-500"></span> 14 days
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                                            Healthy
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-right">
+<button class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Warning/Aging -->
+<tr class="group hover:bg-gray-50 transition-colors cursor-pointer">
+<td class="py-3 px-4 align-middle">
+<input class="rounded border-gray-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col">
+<span class="font-semibold text-gray-900">VT-1109</span>
+<span class="text-xs text-gray-500">Copper Wiring Spool (50m)</span>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                            Electrical
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">Warehouse C</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col gap-1.5 w-full max-w-[200px]">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-gray-900">4,200 Avail</span>
+<span class="text-gray-400">/ 5000 Max</span>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-volt-amber h-1.5 rounded-full" style="width: 84%"></div>
+</div>
+<div class="flex gap-2 text-[10px] text-gray-400">
+<span>Reserved: 0</span>
+<span>Blocked: 0</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="flex items-center gap-1 text-volt-amber font-medium">
+<span class="size-1.5 rounded-full bg-volt-amber"></span> 185 days
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-100">
+                                            Overstock
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-right">
+<button class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Healthy -->
+<tr class="group hover:bg-gray-50 transition-colors cursor-pointer">
+<td class="py-3 px-4 align-middle">
+<input class="rounded border-gray-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col">
+<span class="font-semibold text-gray-900">VT-3312</span>
+<span class="text-xs text-gray-500">Hydraulic Brake Set</span>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                            Brakes
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">Warehouse A</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col gap-1.5 w-full max-w-[200px]">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-gray-900">450 Avail</span>
+<span class="text-gray-400">/ 1000 Max</span>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-1.5 rounded-full" style="width: 45%"></div>
+</div>
+<div class="flex gap-2 text-[10px] text-gray-400">
+<span>Reserved: 120</span>
+<span>Blocked: 0</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-green-500"></span> 32 days
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                                            Healthy
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-right">
+<button class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: Healthy -->
+<tr class="group hover:bg-gray-50 transition-colors cursor-pointer">
+<td class="py-3 px-4 align-middle">
+<input class="rounded border-gray-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col">
+<span class="font-semibold text-gray-900">VT-5001</span>
+<span class="text-xs text-gray-500">LED Headlamp Unit</span>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                            Electronics
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">Warehouse B</td>
+<td class="py-3 px-4 align-middle">
+<div class="flex flex-col gap-1.5 w-full max-w-[200px]">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-gray-900">2,100 Avail</span>
+<span class="text-gray-400">/ 2500 Max</span>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-1.5 rounded-full" style="width: 84%"></div>
+</div>
+<div class="flex gap-2 text-[10px] text-gray-400">
+<span>Reserved: 50</span>
+<span>Blocked: 0</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 align-middle text-gray-600">
+<span class="flex items-center gap-1">
+<span class="size-1.5 rounded-full bg-green-500"></span> 10 days
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                                            Healthy
+                                        </span>
+</td>
+<td class="py-3 px-4 align-middle text-right">
+<button class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-4 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
+<p>Showing <strong>1-5</strong> of <strong>1,248</strong> items</p>
+<div class="flex gap-2">
+<button class="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50" disabled="">Previous</button>
+<button class="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">Next</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
