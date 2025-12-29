@@ -13,7 +13,7 @@ interface Message {
 }
 
 interface ActionRequest {
-    type: 'add' | 'update' | 'delete' | 'update_stock' | 'mark_delivered';
+    type: 'add' | 'update' | 'delete' | 'update_stock' | 'mark_delivered' | 'send_email';
     collection: string;
     data?: any;
     searchField?: string;
@@ -150,7 +150,9 @@ export default function HugoPage() {
                     name: s.supplier_name,
                     part: s.part_id,
                     lead_time: s.lead_time_days,
-                    reliability: s.reliability_score,
+                    reliability: s.reliability_score || s.reliability_rating,
+                    email: s.email || '',
+                    phone: s.phone || '',
                 })),
             }, null, 2),
         };
@@ -255,25 +257,39 @@ export default function HugoPage() {
     const executeAction = async (action: ActionRequest) => {
         setIsLoading(true);
         try {
-            const response = await fetch('/api/hugo/actions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: action.type,
-                    collection: action.collection,
-                    data: action.data,
-                    searchField: action.searchField,
-                    searchValue: action.searchValue,
-                }),
-            });
+            let response;
+            let result;
 
-            const result = await response.json();
+            // Handle email action separately
+            if (action.type === 'send_email') {
+                response = await fetch('/api/hugo/email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(action.data),
+                });
+            } else {
+                response = await fetch('/api/hugo/actions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action.type,
+                        collection: action.collection,
+                        data: action.data,
+                        searchField: action.searchField,
+                        searchValue: action.searchValue,
+                    }),
+                });
+            }
+
+            result = await response.json();
 
             const resultMessage: Message = {
                 id: Date.now().toString(),
                 role: 'assistant',
                 content: result.success
-                    ? `✅ **Action Completed!**\n\n${result.message}\n\nThe data has been updated in real-time.`
+                    ? action.type === 'send_email'
+                        ? `📧 **Email Sent!**\n\n${result.message}\n\nThe supplier has been notified.`
+                        : `✅ **Action Completed!**\n\n${result.message}\n\nThe data has been updated in real-time.`
                     : `❌ **Action Failed**\n\n${result.error}`,
                 timestamp: new Date(),
             };

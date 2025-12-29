@@ -14,6 +14,8 @@ interface Supplier {
     lead_time_days: number;
     min_order_qty: number;
     reliability_rating: number;
+    email?: string;
+    phone?: string;
 }
 
 const emptySupplier: Supplier = {
@@ -24,6 +26,8 @@ const emptySupplier: Supplier = {
     lead_time_days: 7,
     min_order_qty: 1,
     reliability_rating: 0.85,
+    email: '',
+    phone: '',
 };
 
 export default function SuppliersPage() {
@@ -81,6 +85,8 @@ export default function SuppliersPage() {
                 lead_time_days: Number(currentSupplier.lead_time_days),
                 min_order_qty: Number(currentSupplier.min_order_qty),
                 reliability_rating: Number(currentSupplier.reliability_rating),
+                email: currentSupplier.email || '',
+                phone: currentSupplier.phone || '',
             };
 
             if (isEditing && currentSupplier.id) {
@@ -173,13 +179,13 @@ export default function SuppliersPage() {
                                         <div className="w-24 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full ${supplier.avgReliability >= 0.85 ? 'bg-green-500' :
-                                                        supplier.avgReliability >= 0.7 ? 'bg-amber-500' : 'bg-red-500'
+                                                    supplier.avgReliability >= 0.7 ? 'bg-amber-500' : 'bg-red-500'
                                                     }`}
                                                 style={{ width: `${supplier.avgReliability * 100}%` }}
                                             />
                                         </div>
                                         <span className={`text-sm font-medium ${supplier.avgReliability >= 0.85 ? 'text-green-600 dark:text-green-400' :
-                                                supplier.avgReliability >= 0.7 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'
+                                            supplier.avgReliability >= 0.7 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'
                                             }`}>
                                             {supplier.avgReliability >= 0.85 ? 'Excellent' : supplier.avgReliability >= 0.7 ? 'Good' : 'Fair'}
                                         </span>
@@ -240,7 +246,7 @@ export default function SuppliersPage() {
                                                     <div className="w-16 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                                         <div
                                                             className={`h-full rounded-full ${supplier.reliability_rating >= 0.85 ? 'bg-green-500' :
-                                                                    supplier.reliability_rating >= 0.7 ? 'bg-amber-500' : 'bg-red-500'
+                                                                supplier.reliability_rating >= 0.7 ? 'bg-amber-500' : 'bg-red-500'
                                                                 }`}
                                                             style={{ width: `${(supplier.reliability_rating || 0) * 100}%` }}
                                                         />
@@ -348,6 +354,34 @@ export default function SuppliersPage() {
                                 onChange={(e) => setCurrentSupplier(prev => ({ ...prev, reliability_rating: parseFloat(e.target.value) || 0 }))}
                                 className="w-full px-3 py-2 border border-gray-200 dark:border-[#404040] rounded bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                             />
+                        </div>
+                    </div>
+                    <div className="pt-3 border-t border-gray-200 dark:border-[#404040]">
+                        <p className="text-xs font-medium text-slate-500 mb-3 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">contact_mail</span>
+                            Contact Information (for Hugo AI emails)
+                        </p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    value={currentSupplier.email}
+                                    onChange={(e) => setCurrentSupplier(prev => ({ ...prev, email: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-200 dark:border-[#404040] rounded bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                    placeholder="supplier@example.com"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Phone</label>
+                                <input
+                                    type="tel"
+                                    value={currentSupplier.phone}
+                                    onChange={(e) => setCurrentSupplier(prev => ({ ...prev, phone: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-200 dark:border-[#404040] rounded bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                                    placeholder="+91 12345 67890"
+                                />
+                            </div>
                         </div>
                     </div>
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-[#404040]">
