@@ -1,351 +1,274 @@
+'use client';
+
 import Header from '@/components/layout/Header';
-import { stockLevels, dispatchParameters, materialOrders, salesOrders, getStockStatus } from '@/lib/data';
-
-// KPI Card Component
-function KpiCard({
-  title,
-  value,
-  change,
-  changeType,
-  subtitle,
-  icon,
-  alert
-}: {
-  title: string;
-  value: string;
-  change?: string;
-  changeType?: 'up' | 'down';
-  subtitle: string;
-  icon: string;
-  alert?: boolean;
-}) {
-  return (
-    <div className={`bg-white dark:bg-[#262626] rounded border ${alert ? 'border-l-4 border-l-red-500 border-y-gray-200 border-r-gray-200 dark:border-y-[#404040] dark:border-r-[#404040]' : 'border-gray-200 dark:border-[#404040]'} p-5 shadow-sm relative overflow-hidden group`}>
-      <div className="flex justify-between items-start mb-2">
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
-        <span className={`material-symbols-outlined ${alert ? 'text-red-500' : 'text-slate-300 dark:text-slate-600 group-hover:text-[#595959]'} transition-colors`}>
-          {icon}
-        </span>
-      </div>
-      <div className="flex items-end gap-2">
-        <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{value}</h3>
-        {change && (
-          <span className={`text-xs ${changeType === 'up' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'} font-medium mb-1 flex items-center px-1.5 py-0.5 rounded`}>
-            <span className="material-symbols-outlined text-[14px]">
-              {changeType === 'up' ? 'arrow_upward' : 'arrow_downward'}
-            </span>
-            {change}
-          </span>
-        )}
-        {alert && (
-          <span className="text-xs text-red-600 dark:text-red-400 font-medium mb-1 flex items-center bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded">
-            Critical
-          </span>
-        )}
-      </div>
-      <p className="text-xs text-slate-400 mt-2">{subtitle}</p>
-    </div>
-  );
-}
-
-// Production Capacity Component
-function ProductionCapacity() {
-  const models = [
-    { name: 'Voltway S1 V2', variant: 'Premium Range', current: 85, target: 100, status: 'on_track' },
-    { name: 'Voltway S2 V2', variant: 'Long Range', current: 42, target: 60, status: 'behind' },
-    { name: 'Voltway S3 V2', variant: 'Urban Range', current: 55, target: 60, status: 'on_track' },
-  ];
-
-  return (
-    <section className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm">
-      <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040] flex justify-between items-center">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Production Capacity (Today)</h3>
-        <button className="text-xs text-[#595959] hover:underline">View Detailed Schedule</button>
-      </div>
-      <div className="p-5 flex flex-col gap-6">
-        {models.map((model) => (
-          <div key={model.name} className="flex flex-col gap-2">
-            <div className="flex justify-between items-end">
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{model.name}</span>
-                <span className="text-xs text-slate-500">{model.variant}</span>
-              </div>
-              <div className="text-right">
-                <span className="text-sm font-bold text-slate-900 dark:text-white">{model.current}</span>
-                <span className="text-sm text-slate-500"> / {model.target} Units</span>
-              </div>
-            </div>
-            <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full ${model.status === 'on_track' ? 'bg-[#595959]' : 'bg-amber-500'}`}
-                style={{ width: `${(model.current / model.target) * 100}%` }}
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className={`text-xs font-medium flex items-center gap-1 ${model.status === 'on_track' ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                <span className="material-symbols-outlined text-[14px]">
-                  {model.status === 'on_track' ? 'check_circle' : 'schedule'}
-                </span>
-                {model.status === 'on_track' ? 'On Track' : 'Behind Schedule (-1h)'}
-              </span>
-              <span className="text-xs text-slate-400">{Math.round((model.current / model.target) * 100)}% Capacity</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// Logistics Table Component
-function LogisticsTable() {
-  const shipments = [
-    { id: '#SHP-4092', supplier: 'Panasonic', contents: 'Battery Cells (20k)', eta: 'Tomorrow, 09:00', status: 'in_transit' },
-    { id: '#SHP-3321', supplier: 'Bosch', contents: 'ABS Controllers', eta: 'Dec 30, 14:00', status: 'delayed', delay_reason: 'Customs' },
-    { id: '#SHP-4100', supplier: 'Magura', contents: 'Brake Calipers', eta: 'Dec 31, 08:30', status: 'scheduled' },
-  ];
-
-  const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
-    in_transit: { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
-    delayed: { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' },
-    scheduled: { bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-700 dark:text-slate-300', dot: 'bg-slate-400' },
-  };
-
-  return (
-    <section className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm flex-1">
-      <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040] flex justify-between items-center">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Incoming Logistics (Next 7 Days)</h3>
-        <div className="flex gap-2">
-          <button className="size-6 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-            <span className="material-symbols-outlined text-[16px]">chevron_left</span>
-          </button>
-          <button className="size-6 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-          </button>
-        </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm whitespace-nowrap">
-          <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-gray-200 dark:border-[#404040]">
-            <tr>
-              <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">Shipment ID</th>
-              <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">Supplier</th>
-              <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">Contents</th>
-              <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">ETA</th>
-              <th className="px-5 py-3 font-medium text-xs uppercase tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-[#404040]">
-            {shipments.map((shipment) => (
-              <tr key={shipment.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                <td className="px-5 py-3 font-mono text-slate-700 dark:text-slate-300">{shipment.id}</td>
-                <td className="px-5 py-3 text-slate-900 dark:text-white font-medium">{shipment.supplier}</td>
-                <td className="px-5 py-3 text-slate-600 dark:text-slate-400">{shipment.contents}</td>
-                <td className="px-5 py-3 text-slate-600 dark:text-slate-400">{shipment.eta}</td>
-                <td className="px-5 py-3">
-                  <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium ${statusStyles[shipment.status].bg} ${statusStyles[shipment.status].text}`}>
-                    <span className={`size-1.5 rounded-full ${statusStyles[shipment.status].dot}`}></span>
-                    {shipment.status === 'in_transit' ? 'In Transit' : shipment.status === 'delayed' ? `Delayed (${shipment.delay_reason})` : 'Scheduled'}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
-}
-
-// Critical Alerts Component
-function CriticalAlerts() {
-  // Calculate low stock items
-  const lowStockItems = stockLevels.filter(stock => {
-    const dispatch = dispatchParameters.find(d => d.part_id === stock.part_id);
-    return dispatch && stock.quantity_available <= dispatch.min_stock_level;
-  }).slice(0, 3);
-
-  return (
-    <section className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm">
-      <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040] flex justify-between items-center bg-red-50 dark:bg-red-900/10">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-red-700 dark:text-red-400 flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]">gpp_maybe</span>
-          Critical Alerts
-        </h3>
-        <span className="bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200 text-xs font-bold px-2 py-0.5 rounded-full">
-          {lowStockItems.length}
-        </span>
-      </div>
-      <div className="divide-y divide-gray-200 dark:divide-[#404040]">
-        {lowStockItems.map((item) => {
-          const dispatch = dispatchParameters.find(d => d.part_id === item.part_id);
-          const daysUntilStockout = dispatch ? Math.floor(item.quantity_available / (dispatch.reorder_quantity / dispatch.reorder_interval_days)) : 0;
-
-          return (
-            <div key={item.part_id} className="p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-              <div className="flex gap-3">
-                <div className="text-indigo-600 dark:text-indigo-400 mt-0.5">
-                  <span className="material-symbols-outlined text-[20px]">smart_toy</span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">{item.part_name.split(' ').slice(0, 3).join(' ')} Supply Low</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Predicted stockout in <span className="font-bold text-red-600 dark:text-red-400">{Math.max(1, daysUntilStockout)} days</span> based on current build rate.
-                  </p>
-                  <div className="mt-2">
-                    <button className="text-xs font-medium bg-[#595959] text-white px-3 py-1.5 rounded hover:bg-slate-700 transition-colors">
-                      Contact Supplier
-                    </button>
-                    <button className="text-xs font-medium text-[#595959] dark:text-slate-300 px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-1">
-                      Ignore
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-// Inventory Health Component
-function InventoryHealth() {
-  const healthItems = [
-    { name: 'Battery Packs', quantity: '4,200 units', status: 'healthy', icon: 'battery_charging_full' },
-    { name: 'Tires (10")', quantity: '850 units', status: 'low', icon: 'tire_repair' },
-    { name: 'Motor Controllers', quantity: '120 units', status: 'critical', icon: 'memory' },
-  ];
-
-  const statusStyles: Record<string, { bg: string; text: string }> = {
-    healthy: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-400' },
-    low: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400' },
-    critical: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400' },
-  };
-
-  return (
-    <section className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm">
-      <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040] flex justify-between items-center">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Inventory Health</h3>
-        <button className="text-slate-400 hover:text-[#595959] dark:hover:text-white">
-          <span className="material-symbols-outlined text-[18px]">more_horiz</span>
-        </button>
-      </div>
-      <div className="p-4 space-y-4">
-        {healthItems.map((item) => (
-          <div key={item.name} className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="size-8 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[18px] text-slate-500">{item.icon}</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">{item.name}</p>
-                <p className="text-xs text-slate-500">{item.quantity}</p>
-              </div>
-            </div>
-            <span className={`px-2 py-1 rounded text-xs font-bold ${statusStyles[item.status].bg} ${statusStyles[item.status].text}`}>
-              {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-            </span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// System Status Component
-function SystemStatus() {
-  return (
-    <section className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm p-4">
-      <h4 className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-3">System Status</h4>
-      <div className="space-y-3">
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-            <span className="size-2 rounded-full bg-green-500"></span>
-            ERP Sync
-          </span>
-          <span className="text-slate-900 dark:text-white font-mono text-xs">2 mins ago</span>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-            <span className="size-2 rounded-full bg-green-500"></span>
-            Supplier API
-          </span>
-          <span className="text-green-600 dark:text-green-400 text-xs font-medium">Connected</span>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-            <span className="size-2 rounded-full bg-amber-500"></span>
-            Logistics Feed
-          </span>
-          <span className="text-amber-600 dark:text-amber-400 text-xs font-medium">Degraded</span>
-        </div>
-      </div>
-    </section>
-  );
-}
+import { useMaterials, useStockLevels, useDispatchParameters, useMaterialOrders, useSalesOrders } from '@/lib/useFirestore';
+import Link from 'next/link';
 
 export default function Dashboard() {
+  const { data: materials, loading: loadingMaterials } = useMaterials();
+  const { data: stockLevels, loading: loadingStock } = useStockLevels();
+  const { data: dispatchParameters, loading: loadingDispatch } = useDispatchParameters();
+  const { data: materialOrders, loading: loadingOrders } = useMaterialOrders();
+  const { data: salesOrders, loading: loadingSales } = useSalesOrders();
+
+  const loading = loadingMaterials || loadingStock || loadingDispatch || loadingOrders || loadingSales;
+
   // Calculate KPIs
-  const orderedCount = materialOrders.filter(o => o.status === 'ordered').length;
-  const lowStockCount = stockLevels.filter(stock => {
-    const dispatch = dispatchParameters.find(d => d.part_id === stock.part_id);
-    return dispatch && stock.quantity_available <= dispatch.min_stock_level;
-  }).length;
+  const getStockStatus = (partId: string) => {
+    const stock = stockLevels.find((s: any) => s.part_id === partId);
+    const dispatch = dispatchParameters.find((d: any) => d.part_id === partId);
+    if (!stock || !dispatch) return 'healthy';
+    if (stock.quantity_available <= dispatch.min_stock_level * 0.5) return 'critical';
+    if (stock.quantity_available <= dispatch.min_stock_level) return 'low';
+    return 'healthy';
+  };
+
+  const criticalItems = stockLevels.filter((s: any) => getStockStatus(s.part_id) === 'critical');
+  const lowItems = stockLevels.filter((s: any) => getStockStatus(s.part_id) === 'low');
+  const activeStockouts = criticalItems.length + lowItems.length;
+
+  const inProgressOrders = materialOrders.filter((o: any) => o.status === 'ordered').length;
+  const deliveredOrders = materialOrders.filter((o: any) => o.status === 'delivered').length;
+  const onTimeRate = materialOrders.length > 0 ? Math.round((deliveredOrders / Math.max(materialOrders.length, 1)) * 100) : 95;
+
+  const totalSalesQty = salesOrders.reduce((sum: number, o: any) => sum + (o.quantity || 0), 0);
+
+  // Model production data
+  const modelProduction = [
+    { model: 'Voltway S1 V2', target: 150, current: 127, color: 'bg-green-500' },
+    { model: 'Voltway S2 V2', target: 100, current: 89, color: 'bg-blue-500' },
+    { model: 'Voltway S3 V2', target: 80, current: 72, color: 'bg-amber-500' },
+  ];
+
+  // Shipments sample data
+  const shipments = [
+    { id: 'SH-4092', supplier: 'Alpha Electronics', parts: 'P304, P305', eta: 'Today', status: 'In Transit' },
+    { id: 'SH-4093', supplier: 'Beta Motors', parts: 'P329, P330', eta: 'Tomorrow', status: 'Customs' },
+    { id: 'SH-4094', supplier: 'Gamma Parts', parts: 'P307', eta: 'Dec 31', status: 'Shipped' },
+  ];
+
+  if (loading) {
+    return (
+      <>
+        <Header title="Executive Operations Dashboard" />
+        <div className="p-8 flex items-center justify-center min-h-[400px]">
+          <div className="text-slate-500">Loading dashboard data...</div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       <Header title="Executive Operations Dashboard" />
       <div className="p-8 max-w-[1600px] w-full mx-auto space-y-6">
-        {/* KPI Cards */}
+        {/* KPI Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard
-            title="Daily Build Rate"
-            value="142"
-            change="5%"
-            changeType="up"
-            subtitle="Target: 135 units"
-            icon="precision_manufacturing"
-          />
-          <KpiCard
-            title="Active Stockouts"
-            value={lowStockCount.toString()}
-            subtitle="Requires immediate attention"
-            icon="warning"
-            alert={true}
-          />
-          <KpiCard
-            title="On-Time Delivery"
-            value="94.5%"
-            change="2.1%"
-            changeType="down"
-            subtitle="Last 30 days avg"
-            icon="local_shipping"
-          />
-          <KpiCard
-            title="Cash Flow Projection"
-            value="+$1.2M"
-            change="8%"
-            changeType="up"
-            subtitle="Next 7 days forecast"
-            icon="payments"
-          />
+          {/* Daily Build Rate */}
+          <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] p-5">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Daily Build Rate</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">142</p>
+              </div>
+              <span className="material-symbols-outlined text-[#595959] p-2 bg-slate-100 dark:bg-slate-800 rounded">precision_manufacturing</span>
+            </div>
+            <div className="flex items-center gap-1 mt-2">
+              <span className="material-symbols-outlined text-green-500 text-[16px]">trending_up</span>
+              <span className="text-green-600 dark:text-green-400 text-sm font-medium">+5%</span>
+              <span className="text-xs text-slate-400 ml-1">vs yesterday</span>
+            </div>
+          </div>
+
+          {/* Active Stockouts */}
+          <div className="bg-white dark:bg-[#262626] rounded border border-l-4 border-l-red-500 border-y-gray-200 border-r-gray-200 dark:border-y-[#404040] dark:border-r-[#404040] p-5">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Active Stockouts</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{activeStockouts}</p>
+              </div>
+              <span className="material-symbols-outlined text-red-500 p-2 bg-red-50 dark:bg-red-900/20 rounded">warning</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">{criticalItems.length} critical, {lowItems.length} low</p>
+          </div>
+
+          {/* On-Time Delivery */}
+          <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] p-5">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">On-Time Delivery</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">94.5%</p>
+              </div>
+              <span className="material-symbols-outlined text-[#595959] p-2 bg-slate-100 dark:bg-slate-800 rounded">local_shipping</span>
+            </div>
+            <div className="flex items-center gap-1 mt-2">
+              <span className="material-symbols-outlined text-amber-500 text-[16px]">trending_down</span>
+              <span className="text-amber-600 dark:text-amber-400 text-sm font-medium">-2.1%</span>
+            </div>
+          </div>
+
+          {/* Sales Orders */}
+          <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] p-5">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Total Sales Units</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{totalSalesQty.toLocaleString()}</p>
+              </div>
+              <span className="material-symbols-outlined text-green-600 p-2 bg-green-50 dark:bg-green-900/20 rounded">point_of_sale</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">{salesOrders.length} orders</p>
+          </div>
         </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column (2/3 width) */}
+          {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-6">
-            <ProductionCapacity />
-            <LogisticsTable />
+            {/* Production Capacity */}
+            <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm">
+              <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040] flex justify-between items-center">
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Production Capacity</h3>
+                <span className="text-xs text-slate-400">Today&apos;s Progress</span>
+              </div>
+              <div className="p-5 space-y-4">
+                {modelProduction.map((mp) => (
+                  <div key={mp.model}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="font-medium text-slate-900 dark:text-white">{mp.model}</span>
+                      <span className="text-slate-500">{mp.current}/{mp.target} units</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${mp.color}`}
+                        style={{ width: `${(mp.current / mp.target) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Incoming Logistics */}
+            <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm">
+              <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040] flex justify-between items-center">
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Incoming Logistics</h3>
+                <Link href="/procurement" className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">View All</Link>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400">
+                    <tr>
+                      <th className="px-5 py-2 text-left font-medium text-xs uppercase">Shipment</th>
+                      <th className="px-5 py-2 text-left font-medium text-xs uppercase">Supplier</th>
+                      <th className="px-5 py-2 text-left font-medium text-xs uppercase">Parts</th>
+                      <th className="px-5 py-2 text-left font-medium text-xs uppercase">ETA</th>
+                      <th className="px-5 py-2 text-left font-medium text-xs uppercase">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-[#404040]">
+                    {shipments.map((s) => (
+                      <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                        <td className="px-5 py-3 font-mono text-slate-900 dark:text-white">{s.id}</td>
+                        <td className="px-5 py-3 text-slate-600 dark:text-slate-400">{s.supplier}</td>
+                        <td className="px-5 py-3 text-slate-600 dark:text-slate-400">{s.parts}</td>
+                        <td className="px-5 py-3 font-medium text-slate-900 dark:text-white">{s.eta}</td>
+                        <td className="px-5 py-3">
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${s.status === 'In Transit' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                              s.status === 'Customs' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                            }`}>
+                            {s.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
-          {/* Right Column (1/3 width) */}
+          {/* Right Column - 1/3 width */}
           <div className="space-y-6">
-            <CriticalAlerts />
-            <InventoryHealth />
-            <SystemStatus />
+            {/* Critical Alerts */}
+            <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm">
+              <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040] flex justify-between items-center">
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Critical Alerts</h3>
+                <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs font-bold">
+                  {criticalItems.length + lowItems.length}
+                </span>
+              </div>
+              <div className="p-4 space-y-3 max-h-80 overflow-y-auto">
+                {[...criticalItems, ...lowItems].slice(0, 5).map((item: any) => (
+                  <div key={item.part_id} className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-red-500 text-[18px]">warning</span>
+                      <span className="font-medium text-red-800 dark:text-red-300 text-sm">Low Stock: {item.part_id}</span>
+                    </div>
+                    <p className="text-xs text-red-600 dark:text-red-400 mt-1 ml-6">
+                      {item.part_name?.slice(0, 35)}... - Only {item.quantity_available} left
+                    </p>
+                    <div className="flex gap-2 mt-2 ml-6">
+                      <Link href="/procurement" className="text-xs text-red-700 dark:text-red-400 hover:underline">Order Now</Link>
+                    </div>
+                  </div>
+                ))}
+                {criticalItems.length + lowItems.length === 0 && (
+                  <p className="text-center text-slate-500 py-4">No critical alerts</p>
+                )}
+              </div>
+            </div>
+
+            {/* System Status */}
+            <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm p-5">
+              <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200 mb-4">System Status</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 bg-green-500 rounded-full"></span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Firebase Sync</span>
+                  </div>
+                  <span className="text-xs text-green-600 dark:text-green-400">Connected</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 bg-green-500 rounded-full"></span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Firestore</span>
+                  </div>
+                  <span className="text-xs text-green-600 dark:text-green-400">Online</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 bg-green-500 rounded-full"></span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Real-time Updates</span>
+                  </div>
+                  <span className="text-xs text-green-600 dark:text-green-400">Active</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm p-5">
+              <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Link href="/admin" className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <span className="material-symbols-outlined text-[#595959]">database</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">Seed DB</span>
+                </Link>
+                <Link href="/procurement" className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <span className="material-symbols-outlined text-[#595959]">add_shopping_cart</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">New Order</span>
+                </Link>
+                <Link href="/inventory" className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <span className="material-symbols-outlined text-[#595959]">inventory_2</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">Inventory</span>
+                </Link>
+                <Link href="/hugo" className="flex items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
+                  <span className="material-symbols-outlined text-indigo-600">smart_toy</span>
+                  <span className="text-sm text-indigo-700 dark:text-indigo-400">Hugo AI</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
