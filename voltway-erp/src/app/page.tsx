@@ -174,8 +174,8 @@ export default function Dashboard() {
                         <td className="px-5 py-3 font-medium text-slate-900 dark:text-white">{s.eta}</td>
                         <td className="px-5 py-3">
                           <span className={`px-2 py-0.5 rounded text-xs font-medium ${s.status === 'In Transit' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                              s.status === 'Customs' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                                'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                            s.status === 'Customs' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                              'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
                             }`}>
                             {s.status}
                           </span>
@@ -251,9 +251,9 @@ export default function Dashboard() {
             <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm p-5">
               <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200 mb-4">Quick Actions</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Link href="/admin" className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  <span className="material-symbols-outlined text-[#595959]">database</span>
-                  <span className="text-sm text-slate-700 dark:text-slate-300">Seed DB</span>
+                <Link href="/imports" className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <span className="material-symbols-outlined text-[#595959]">cloud_upload</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">Upload Database</span>
                 </Link>
                 <Link href="/procurement" className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                   <span className="material-symbols-outlined text-[#595959]">add_shopping_cart</span>
