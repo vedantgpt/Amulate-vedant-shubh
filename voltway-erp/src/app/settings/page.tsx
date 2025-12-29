@@ -1,6 +1,111 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
+import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+const COLLECTIONS = ['materials', 'stock_levels', 'dispatch_parameters', 'material_orders', 'sales_orders', 'suppliers'];
 
 export default function SettingsPage() {
+    const [backupStatus, setBackupStatus] = useState('');
+    const [restoreStatus, setRestoreStatus] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [lastBackupTime, setLastBackupTime] = useState<string | null>(null);
+    const [hasBackup, setHasBackup] = useState(false);
+
+    // Check if backup exists on load
+    useEffect(() => {
+        const savedBackup = localStorage.getItem('voltway_backup');
+        if (savedBackup) {
+            const backup = JSON.parse(savedBackup);
+            setLastBackupTime(backup.timestamp);
+            setHasBackup(true);
+        }
+    }, []);
+
+    // BACKUP: Save current Firebase data to localStorage
+    const backupDatabase = async () => {
+        setLoading(true);
+        setBackupStatus('Backing up database...');
+
+        try {
+            const backup: { [key: string]: any[] } = {};
+
+            for (const collectionName of COLLECTIONS) {
+                const snapshot = await getDocs(collection(db, collectionName));
+                backup[collectionName] = snapshot.docs.map(doc => ({
+                    ...doc.data()
+                }));
+                setBackupStatus(`Backed up ${collectionName}...`);
+            }
+
+            // Save to localStorage with timestamp
+            const backupData = {
+                timestamp: new Date().toISOString(),
+                data: backup
+            };
+            localStorage.setItem('voltway_backup', JSON.stringify(backupData));
+
+            setLastBackupTime(backupData.timestamp);
+            setHasBackup(true);
+            setBackupStatus(`✅ Backup complete! Saved ${Object.values(backup).flat().length} records`);
+        } catch (error: any) {
+            setBackupStatus(`❌ Error: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // RESTORE: Load backup from localStorage and write to Firebase
+    const restoreDatabase = async () => {
+        const savedBackup = localStorage.getItem('voltway_backup');
+        if (!savedBackup) {
+            setRestoreStatus('❌ No backup found!');
+            return;
+        }
+
+        setLoading(true);
+        setRestoreStatus('Restoring database...');
+
+        try {
+            const backup = JSON.parse(savedBackup);
+
+            for (const collectionName of COLLECTIONS) {
+                const data = backup.data[collectionName] || [];
+                const colRef = collection(db, collectionName);
+
+                // Clear existing data
+                const existing = await getDocs(colRef);
+                for (const docSnap of existing.docs) {
+                    await deleteDoc(doc(db, collectionName, docSnap.id));
+                }
+
+                // Restore from backup
+                for (const item of data) {
+                    await addDoc(colRef, item);
+                }
+
+                setRestoreStatus(`Restored ${collectionName}...`);
+            }
+
+            setRestoreStatus(`✅ Restore complete! Loaded backup from ${new Date(backup.timestamp).toLocaleString()}`);
+        } catch (error: any) {
+            setRestoreStatus(`❌ Error: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const collections = [
+        { name: 'materials', label: 'Materials', icon: 'category' },
+        { name: 'stock_levels', label: 'Stock Levels', icon: 'inventory_2' },
+        { name: 'dispatch_parameters', label: 'Dispatch Parameters', icon: 'tune' },
+        { name: 'material_orders', label: 'Purchase Orders', icon: 'shopping_cart' },
+        { name: 'sales_orders', label: 'Sales Orders', icon: 'point_of_sale' },
+        { name: 'suppliers', label: 'Suppliers', icon: 'local_shipping' },
+    ];
+
     return (
         <>
             <Header title="Settings" />
@@ -32,6 +137,92 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
+                {/* Backup & Restore - UPDATED */}
+                <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm">
+                    <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040]">
+                        <h3 className="text-sm font-bold uppercase tracking-wide text-slate-800 dark:text-slate-200">Backup & Restore</h3>
+                        <p className="text-xs text-slate-500 mt-1">Save your current database or restore from previous backup</p>
+                    </div>
+                    <div className="p-5 space-y-6">
+                        {/* Backup Section */}
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-5">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 bg-green-100 dark:bg-green-900/40 rounded-lg">
+                                        <span className="material-symbols-outlined text-green-600 text-2xl">backup</span>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-green-900 dark:text-green-300">Backup Current Database</h4>
+                                        <p className="text-sm text-green-700 dark:text-green-400 mt-1">
+                                            Save all your current data (materials, orders, stock, etc.) as a backup
+                                        </p>
+                                        {lastBackupTime && (
+                                            <p className="text-xs text-green-600 dark:text-green-500 mt-2">
+                                                Last backup: {new Date(lastBackupTime).toLocaleString()}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={backupDatabase}
+                                    disabled={loading}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">cloud_upload</span>
+                                    {loading ? 'Saving...' : 'Save Backup'}
+                                </button>
+                            </div>
+                            {backupStatus && (
+                                <p className="mt-3 text-sm text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded">
+                                    {backupStatus}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Restore Section */}
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-5">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 bg-amber-100 dark:bg-amber-900/40 rounded-lg">
+                                        <span className="material-symbols-outlined text-amber-600 text-2xl">restore</span>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-amber-900 dark:text-amber-300">Restore from Backup</h4>
+                                        <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                                            {hasBackup
+                                                ? 'Restore your saved backup (will overwrite current data)'
+                                                : 'No backup available yet. Save a backup first!'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={restoreDatabase}
+                                    disabled={loading || !hasBackup}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-colors disabled:opacity-50"
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">cloud_download</span>
+                                    {loading ? 'Restoring...' : 'Restore Backup'}
+                                </button>
+                            </div>
+                            {restoreStatus && (
+                                <p className="mt-3 text-sm text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-3 py-2 rounded">
+                                    {restoreStatus}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Collections Info */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                            {collections.map((col) => (
+                                <div key={col.name} className="bg-slate-50 dark:bg-slate-800/50 rounded p-3 text-center border border-gray-200 dark:border-[#404040]">
+                                    <span className="material-symbols-outlined text-[#595959] text-xl">{col.icon}</span>
+                                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{col.label}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Data Integrations */}
                 <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] shadow-sm">
                     <div className="px-5 py-4 border-b border-gray-200 dark:border-[#404040]">
@@ -44,27 +235,13 @@ export default function SettingsPage() {
                                     <span className="material-symbols-outlined text-green-600">check_circle</span>
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-900 dark:text-white">Firebase</p>
-                                    <p className="text-sm text-slate-500">Connected • Last sync: 2 mins ago</p>
+                                    <p className="font-medium text-slate-900 dark:text-white">Firebase Firestore</p>
+                                    <p className="text-sm text-slate-500">Connected • Real-time sync active</p>
                                 </div>
                             </div>
-                            <button className="px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
-                                Configure
-                            </button>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="size-10 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-slate-400">cloud_off</span>
-                                </div>
-                                <div>
-                                    <p className="font-medium text-slate-900 dark:text-white">Slack Notifications</p>
-                                    <p className="text-sm text-slate-500">Not connected</p>
-                                </div>
-                            </div>
-                            <button className="px-3 py-1.5 text-sm bg-[#595959] text-white rounded hover:bg-slate-700 transition-colors">
-                                Connect
-                            </button>
+                            <span className="px-2 py-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded">
+                                Online
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -77,7 +254,7 @@ export default function SettingsPage() {
                         </div>
                         <div>
                             <h3 className="font-bold text-slate-900 dark:text-white">Voltway ERP</h3>
-                            <p className="text-sm text-slate-500">Version 1.0.0 • AI-Native ERP</p>
+                            <p className="text-sm text-slate-500">Version 1.0.0 • AI-Native ERP with Firebase</p>
                         </div>
                     </div>
                 </div>
