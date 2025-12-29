@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import { useMaterials, useStockLevels, useDispatchParameters, useMaterialOrders, useSalesOrders, useSuppliers } from '@/lib/useFirestore';
+import jsPDF from 'jspdf';
 
 interface Message {
     id: string;
@@ -57,6 +58,8 @@ export default function HugoPage() {
     const [pendingAction, setPendingAction] = useState<ActionRequest | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isInitialized, setIsInitialized] = useState(false);
+    const [uploadedFile, setUploadedFile] = useState<{ name: string; content: string; type: string } | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Load chat history from localStorage on mount
     useEffect(() => {
@@ -89,6 +92,255 @@ export default function HugoPage() {
     const clearChat = () => {
         setMessages([defaultMessage]);
         localStorage.removeItem(STORAGE_KEY);
+        setUploadedFile(null);
+    };
+
+    // Handle file upload
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const maxSize = 5 * 1024 * 1024; // 5MB limit
+        if (file.size > maxSize) {
+            alert('File too large. Maximum size is 5MB.');
+            return;
+        }
+
+        try {
+            if (file.type === 'application/pdf') {
+                // Read PDF as base64 for server-side processing
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    const base64 = (reader.result as string).split(',')[1];
+                    setUploadedFile({ name: file.name, content: base64, type: 'pdf' });
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith('image/')) {
+                // Read image as base64
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = (reader.result as string).split(',')[1];
+                    setUploadedFile({ name: file.name, content: base64, type: 'image' });
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Unsupported file type. Please upload PDF or image files.');
+            }
+        } catch (error) {
+            console.error('Error reading file:', error);
+            alert('Failed to read file.');
+        }
+
+        // Reset input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    // Export conversation to PDF
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 20;
+        const maxWidth = pageWidth - 2 * margin;
+        let yPosition = 20;
+        const lineHeight = 7;
+
+        // Title
+        doc.setFontSize(20);
+        doc.setTextColor(79, 70, 229); // Indigo
+        doc.text('Hugo AI - Conversation Report', margin, yPosition);
+        yPosition += 12;
+
+        // Subtitle with date
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139); // Slate
+        doc.text(`Generated: ${new Date().toLocaleString()}`, margin, yPosition);
+        doc.text(`Voltway ERP - Operations Hub`, pageWidth - margin, yPosition, { align: 'right' });
+        yPosition += 10;
+
+        // Divider line
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 10;
+
+        // Messages
+        doc.setFontSize(11);
+        messages.forEach((msg) => {
+            // Check if we need a new page
+            if (yPosition > 270) {
+                doc.addPage();
+                yPosition = 20;
+            }
+
+            // Role label
+            doc.setFontSize(9);
+            if (msg.role === 'user') {
+                doc.setTextColor(14, 165, 233); // Cyan
+                doc.text('You', margin, yPosition);
+            } else {
+                doc.setTextColor(99, 102, 241); // Indigo
+                doc.text('Hugo AI', margin, yPosition);
+            }
+            yPosition += 5;
+
+            // Message content - clean markdown
+            doc.setFontSize(10);
+            doc.setTextColor(15, 23, 42); // Slate-900
+            const cleanContent = msg.content
+                .replace(/\*\*(.*?)\*\*/g, '$1')
+                .replace(/\*(.*?)\*/g, '$1')
+                .replace(/• /g, '- ');
+
+            const lines = doc.splitTextToSize(cleanContent, maxWidth);
+            lines.forEach((line: string) => {
+                if (yPosition > 280) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                doc.text(line, margin, yPosition);
+                yPosition += lineHeight;
+            });
+            yPosition += 5;
+        });
+
+        // Footer
+        const pageCount = doc.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text(
+                `Page ${i} of ${pageCount} | Voltway ERP - Hugo AI`,
+                pageWidth / 2,
+                290,
+                { align: 'center' }
+            );
+        }
+
+        doc.save(`hugo-conversation-${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
+    // Export single message to PDF
+    const exportSingleMessageToPDF = (msg: Message) => {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 20;
+        const maxWidth = pageWidth - 2 * margin;
+        let yPosition = 20;
+        const lineHeight = 7;
+
+        // Header with gradient-like effect
+        doc.setFillColor(79, 70, 229);
+        doc.roundedRect(margin, 15, pageWidth - 2 * margin, 35, 3, 3, 'F');
+        doc.setFontSize(22);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Hugo AI', margin + 10, 32);
+        doc.setFontSize(11);
+        doc.setTextColor(200, 200, 255);
+        doc.text('Procurement Intelligence Report', margin + 10, 42);
+        yPosition = 65;
+
+        // Subtitle
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Generated: ${new Date().toLocaleString()}`, margin, yPosition);
+        doc.text(`Voltway ERP`, pageWidth - margin, yPosition, { align: 'right' });
+        yPosition += 8;
+
+        // Divider
+        doc.setDrawColor(226, 232, 240);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 12;
+
+        // Label
+        doc.setFontSize(9);
+        doc.setTextColor(99, 102, 241);
+        doc.text('AI Analysis', margin, yPosition);
+        yPosition += 6;
+
+        // Content - parse line by line for structure
+        const contentLines = msg.content.split('\n');
+        contentLines.forEach((line) => {
+            const trimmed = line.trim();
+            if (!trimmed) { yPosition += 4; return; }
+
+            if (yPosition > 275) { doc.addPage(); yPosition = 25; }
+
+            // Headers (bold text or ending with colon)
+            if ((trimmed.startsWith('**') && trimmed.endsWith('**')) || trimmed.endsWith(':')) {
+                yPosition += 3;
+                doc.setFontSize(11);
+                doc.setTextColor(79, 70, 229);
+                const headerText = trimmed.replace(/\*\*/g, '').replace(/:$/, '');
+                doc.text(headerText, margin, yPosition);
+                doc.setDrawColor(79, 70, 229);
+                doc.setLineWidth(0.3);
+                doc.line(margin, yPosition + 2, margin + doc.getTextWidth(headerText), yPosition + 2);
+                yPosition += 9;
+                return;
+            }
+
+            // Bullet points
+            if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
+                const bulletText = trimmed.replace(/^[•\-\*]\s*/, '').replace(/\*\*/g, '');
+                doc.setFontSize(10);
+                doc.setTextColor(15, 23, 42);
+                doc.setFillColor(14, 165, 233);
+                doc.circle(margin + 2, yPosition - 1.5, 1.2, 'F');
+                const wrapped = doc.splitTextToSize(bulletText, maxWidth - 10);
+                wrapped.forEach((w: string) => {
+                    if (yPosition > 280) { doc.addPage(); yPosition = 25; }
+                    doc.text(w, margin + 8, yPosition);
+                    yPosition += 5.5;
+                });
+                return;
+            }
+
+            // Numbered items
+            const numMatch = trimmed.match(/^(\d+)\.\s*(.+)/);
+            if (numMatch) {
+                doc.setFillColor(79, 70, 229);
+                doc.circle(margin + 3, yPosition - 1, 3, 'F');
+                doc.setFontSize(7);
+                doc.setTextColor(255, 255, 255);
+                doc.text(numMatch[1], margin + 3, yPosition + 0.3, { align: 'center' });
+                doc.setFontSize(10);
+                doc.setTextColor(15, 23, 42);
+                const wrapped = doc.splitTextToSize(numMatch[2].replace(/\*\*/g, ''), maxWidth - 12);
+                wrapped.forEach((w: string) => {
+                    if (yPosition > 280) { doc.addPage(); yPosition = 25; }
+                    doc.text(w, margin + 10, yPosition);
+                    yPosition += 5.5;
+                });
+                yPosition += 2;
+                return;
+            }
+
+            // Regular text
+            doc.setFontSize(10);
+            doc.setTextColor(51, 65, 85);
+            const wrapped = doc.splitTextToSize(trimmed.replace(/\*\*/g, ''), maxWidth);
+            wrapped.forEach((w: string) => {
+                if (yPosition > 280) { doc.addPage(); yPosition = 25; }
+                doc.text(w, margin, yPosition);
+                yPosition += 5.5;
+            });
+        });
+
+        // Footer
+        const pageCount = doc.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text(
+                `Page ${i} of ${pageCount} | Voltway ERP - Hugo AI`,
+                pageWidth / 2,
+                290,
+                { align: 'center' }
+            );
+        }
+
+        doc.save(`hugo-report-${new Date().toISOString().split('T')[0]}.pdf`);
     };
 
     const samplePrompts = [
@@ -316,12 +568,16 @@ export default function HugoPage() {
 
     const handleSend = async (messageText?: string) => {
         const text = messageText || input;
-        if (!text.trim() || isLoading) return;
+        if ((!text.trim() && !uploadedFile) || isLoading) return;
+
+        const displayText = uploadedFile
+            ? `${text.trim() || 'Analyze this document'} [📎 ${uploadedFile.name}]`
+            : text.trim();
 
         const userMessage: Message = {
             id: Date.now().toString(),
             role: 'user',
-            content: text.trim(),
+            content: displayText,
             timestamp: new Date(),
         };
 
@@ -334,11 +590,19 @@ export default function HugoPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    message: text.trim(),
+                    message: text.trim() || 'Please analyze this document and provide key insights.',
                     databaseContext: getDatabaseContext(),
                     conversationHistory: messages.slice(1).map(m => ({ role: m.role, content: m.content })),
+                    file: uploadedFile ? {
+                        name: uploadedFile.name,
+                        content: uploadedFile.content,
+                        type: uploadedFile.type,
+                    } : undefined,
                 }),
             });
+
+            // Clear uploaded file after sending
+            setUploadedFile(null);
 
             const data = await response.json();
 
@@ -427,8 +691,8 @@ export default function HugoPage() {
                 {/* Status Bar */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
-                            <span className="material-symbols-outlined text-2xl text-indigo-600 dark:text-indigo-400">smart_toy</span>
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                            <span className="material-symbols-outlined text-2xl text-white">smart_toy</span>
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -439,11 +703,19 @@ export default function HugoPage() {
                                 </span>
                             </h2>
                             <p className="text-xs text-slate-500">
-                                {materials.length} materials • {materialOrders.length} orders • LangChain + Groq (Llama 3.3 70B)
+                                {materials.length} materials • {materialOrders.length} orders • MegaLLM (OpenAI OSS 120B)
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={exportToPDF}
+                            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 rounded-lg transition-all shadow-sm hover:shadow-md"
+                            title="Export conversation to PDF"
+                        >
+                            <span className="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+                            Export PDF
+                        </button>
                         <button
                             onClick={clearChat}
                             className="flex items-center gap-1 px-2 py-1 text-xs text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
@@ -460,7 +732,7 @@ export default function HugoPage() {
                 </div>
 
                 {/* Chat Area */}
-                <div className="flex-1 bg-white dark:bg-[#262626] rounded-xl border border-gray-200 dark:border-[#404040] shadow-sm flex flex-col overflow-hidden">
+                <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden">
                     {/* Messages */}
                     <div className="flex-1 p-4 overflow-y-auto space-y-4">
                         {messages.map((msg) => (
@@ -495,9 +767,21 @@ export default function HugoPage() {
                                                 } prose prose-sm max-w-none`}
                                             dangerouslySetInnerHTML={{ __html: formatContent(msg.content) }}
                                         />
-                                        <p className={`text-xs mt-1 ${msg.role === 'assistant' ? 'text-slate-400' : 'text-indigo-200'}`}>
-                                            {msg.timestamp.toLocaleTimeString()}
-                                        </p>
+                                        <div className="flex items-center justify-between mt-1">
+                                            <p className={`text-xs ${msg.role === 'assistant' ? 'text-slate-400' : 'text-indigo-200'}`}>
+                                                {msg.timestamp.toLocaleTimeString()}
+                                            </p>
+                                            {msg.role === 'assistant' && msg.id !== '1' && (
+                                                <button
+                                                    onClick={() => exportSingleMessageToPDF(msg)}
+                                                    className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded transition-colors"
+                                                    title="Export this response as PDF"
+                                                >
+                                                    <span className="material-symbols-outlined text-[12px]">picture_as_pdf</span>
+                                                    PDF
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                     {/* Action Buttons */}
                                     {msg.action && (
@@ -560,24 +844,58 @@ export default function HugoPage() {
                             ))}
                         </div>
                         {/* Input */}
-                        <div className="flex gap-3">
-                            <input
-                                type="text"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Ask Hugo anything or request an action..."
-                                disabled={isLoading}
-                                className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-gray-200 dark:border-[#404040] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
-                            />
-                            <button
-                                onClick={() => handleSend()}
-                                disabled={isLoading || !input.trim()}
-                                className="px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <span className="material-symbols-outlined text-[20px]">send</span>
-                                Send
-                            </button>
+                        <div className="flex flex-col gap-2">
+                            {/* File upload indicator */}
+                            {uploadedFile && (
+                                <div className="flex items-center gap-2 px-3 py-2 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                                    <span className="material-symbols-outlined text-cyan-600 text-[18px]">
+                                        {uploadedFile.type === 'pdf' ? 'description' : 'image'}
+                                    </span>
+                                    <span className="text-sm text-cyan-700 dark:text-cyan-300 flex-1 truncate">{uploadedFile.name}</span>
+                                    <button
+                                        onClick={() => setUploadedFile(null)}
+                                        className="text-cyan-500 hover:text-red-500 transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">close</span>
+                                    </button>
+                                </div>
+                            )}
+                            <div className="flex gap-2">
+                                {/* Hidden file input */}
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".pdf,image/*"
+                                    onChange={handleFileUpload}
+                                    className="hidden"
+                                />
+                                {/* Upload button */}
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isLoading}
+                                    className="px-3 py-3 bg-slate-100 dark:bg-slate-800 border border-gray-200 dark:border-[#404040] rounded-lg text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors disabled:opacity-50"
+                                    title="Upload PDF or Image"
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">attach_file</span>
+                                </button>
+                                <input
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder={uploadedFile ? `Ask about ${uploadedFile.name}...` : "Ask Hugo anything or request an action..."}
+                                    disabled={isLoading}
+                                    className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-gray-200 dark:border-[#404040] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
+                                />
+                                <button
+                                    onClick={() => handleSend()}
+                                    disabled={isLoading || (!input.trim() && !uploadedFile)}
+                                    className="px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">send</span>
+                                    Send
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
