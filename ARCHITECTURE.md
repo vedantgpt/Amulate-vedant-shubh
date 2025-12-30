@@ -72,19 +72,160 @@
                                     ▼
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         FUTURE AI LAYER                                  │
-│                     (Hugo - Procurement AI Agent)                        │
+│                        🤖 HUGO AI LAYER                                  │
+│                   (Intelligent Procurement Copilot)                      │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
-│  🤖 Hugo AI Agent (Python/Flask Backend)                                │
+│  🧠 Hugo AI Agent (LangChain + MegaLLM)                                 │
 │  ├─ Natural Language Processing                                         │
 │  ├─ LangChain Orchestration                                            │
-│  ├─ OpenAI GPT Integration                                             │
-│  ├─ Graph Analysis (NetworkX)                                           │
-│  └─ Slack Notifications                                                 │
+│  ├─ MegaLLM (OpenAI-compatible GPT)                                    │
+│  ├─ OCR Document Processing (OCR.space)                                │
+│  ├─ Email Automation (Resend API)                                      │
+│  └─ PDF Export (jsPDF)                                                  │
 │                                                                          │
-│  Status: UI Ready, Backend In Progress                                  │
+│  Status: ✅ LIVE - Fully Integrated                                     │
 └─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🤖 Hugo AI Architecture
+
+### **AI Processing Pipeline**
+
+```
+┌─────────────┐
+│    USER     │  "What parts are running low?"
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────────────────────────────────┐
+│  Hugo AI Frontend (src/app/hugo/page.tsx)   │
+│  ├─ Chat interface with message history     │
+│  ├─ File upload (PDF/Image)                 │
+│  ├─ Document attachment handling            │
+│  └─ PDF export functionality                │
+└──────┬──────────────────────────────────────┘
+       │
+       ▼
+┌─────────────────────────────────────────────┐
+│  Hugo API Route (/api/hugo)                  │
+│  ├─ Receive message + file                  │
+│  ├─ Process file with OCR (if uploaded)     │
+│  └─ Build context with database snapshot    │
+└──────┬──────────────────────────────────────┘
+       │
+       ├─────────────────────────────────────────┐
+       ▼                                         ▼
+┌─────────────────────────┐       ┌─────────────────────────┐
+│  OCR.space API          │       │  Firebase Firestore     │
+│  ├─ PDF text extraction │       │  ├─ materials           │
+│  ├─ Image OCR           │       │  ├─ stock_levels        │
+│  └─ Multi-page support  │       │  └─ suppliers           │
+└─────────────────────────┘       └─────────────────────────┘
+       │                                         │
+       └─────────────────┬───────────────────────┘
+                         ▼
+┌─────────────────────────────────────────────┐
+│  LangChain + MegaLLM                         │
+│  ├─ System prompt with ERP context          │
+│  ├─ Conversation history (last 6 msgs)      │
+│  ├─ Database context injection              │
+│  ├─ File content (OCR extracted text)       │
+│  └─ Action block parsing (JSON)             │
+└──────┬──────────────────────────────────────┘
+       │
+       ▼
+┌─────────────────────────────────────────────┐
+│  Response Processing                         │
+│  ├─ Parse action blocks (if any)            │
+│  ├─ Execute database operations             │
+│  ├─ Send emails (if requested)              │
+│  └─ Return formatted response               │
+└──────┬──────────────────────────────────────┘
+       │
+       ▼
+┌─────────────┐
+│    USER     │  Sees AI response with insights!
+└─────────────┘
+```
+
+---
+
+## 🔄 Hugo AI Action Types
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       HUGO AI CAPABILITIES                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  📊 QUERY ACTIONS                        🔧 DATABASE ACTIONS            │
+│  ├─ Stock level queries                  ├─ add (new records)           │
+│  ├─ Supplier info lookup                 ├─ update (modify records)     │
+│  ├─ Order status check                   ├─ delete (remove records)     │
+│  └─ Recommendations                      ├─ update_stock                │
+│                                          ├─ mark_delivered              │
+│  📄 DOCUMENT PROCESSING                  ├─ update_supplier             │
+│  ├─ PDF OCR extraction                   └─ update_all_supplier_emails  │
+│  ├─ Image text recognition                                              │
+│  └─ Multi-page document support          📧 EMAIL ACTIONS               │
+│                                          ├─ send_email                  │
+│  📑 EXPORT ACTIONS                       └─ Reorder requests            │
+│  ├─ Full conversation PDF                                               │
+│  └─ Single message report                                               │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📄 Document Processing Flow
+
+### **PDF/Image OCR Pipeline**
+
+```
+User uploads file
+       │
+       ▼
+┌─────────────────────────────────────────────┐
+│  Frontend File Handler                       │
+│  ├─ Validate file type (PDF/JPG/PNG)        │
+│  ├─ Check file size (< 5MB)                 │
+│  ├─ Convert to base64                       │
+│  └─ Send with message to API                │
+└──────┬──────────────────────────────────────┘
+       │
+       ▼
+┌─────────────────────────────────────────────┐
+│  API Route Processing                        │
+│  ├─ Detect file type                        │
+│  │   ├─ PDF → OCR.space (filetype=PDF)     │
+│  │   └─ Image → OCR.space (base64Image)    │
+│  ├─ Send to OCR.space API                   │
+│  └─ Extract text from all pages             │
+└──────┬──────────────────────────────────────┘
+       │
+       ▼
+┌─────────────────────────────────────────────┐
+│  OCR.space API                               │
+│  ├─ Engine 2 (more accurate)                │
+│  ├─ Table detection enabled                 │
+│  ├─ Orientation detection                   │
+│  └─ Returns ParsedResults[]                 │
+└──────┬──────────────────────────────────────┘
+       │
+       ▼
+┌─────────────────────────────────────────────┐
+│  Text Processing                             │
+│  ├─ Combine text from all pages             │
+│  ├─ Format with page separators             │
+│  ├─ Limit to 12,000 characters              │
+│  └─ Inject into LLM context                 │
+└──────┬──────────────────────────────────────┘
+       │
+       ▼
+Hugo AI analyzes extracted text
 ```
 
 ---
@@ -233,11 +374,13 @@ All in < 1 second! ⚡
 📚 suppliers                    📚 dispatch_parameters
 ┌─────────────────────┐         ┌──────────────────────┐
 │ SupA                │         │ P304-params          │
-│ ├─ name             │────────▶│ ├─ part_id: "P304"   │
-│ ├─ email            │         │ ├─ min_stock: 50     │
-│ ├─ reliability      │         │ ├─ reorder_point: 100│
-│ └─ lead_time        │         │ └─ reorder_qty: 200  │
-└─────────────────────┘         └──────────────────────┘
+│ ├─ supplier_id      │────────▶│ ├─ part_id: "P304"   │
+│ ├─ supplier_name    │         │ ├─ min_stock: 50     │
+│ ├─ email            │         │ ├─ reorder_point: 100│
+│ ├─ phone            │         │ └─ reorder_qty: 200  │
+│ ├─ reliability_score│         └──────────────────────┘
+│ └─ lead_time_days   │
+└─────────────────────┘
 
 📚 sales_orders
 ┌─────────────────────┐
@@ -265,6 +408,10 @@ All in < 1 second! ⚡
    page.tsx          inventory/page.tsx  procurement/page.tsx
    (Dashboard)       (Stock Tracking)    (Purchase Orders)
         │                  │                  │
+        │                  ▼                  │
+        │            hugo/page.tsx            │
+        │            (AI Copilot)             │
+        │                  │                  │
         └──────────────────┼──────────────────┘
                            ▼
               ┌────────────────────────┐
@@ -276,6 +423,10 @@ All in < 1 second! ⚡
               │                        │
               │  UI/                   │
               │  └─ Modal.tsx          │
+              │                        │
+              │  Theme/                │
+              │  ├─ ThemeProvider.tsx  │
+              │  └─ ThemeToggle.tsx    │
               └────────────────────────┘
                            │
                            ▼
@@ -292,113 +443,25 @@ All in < 1 second! ⚡
 
 ---
 
-## 🔌 Hook Architecture
+## 🔌 API Architecture
 
 ```
-Component (e.g., Dashboard)
-         │
-         │ const { data, loading, error } = useMaterials();
-         │
-         ▼
-┌─────────────────────┐
-│  useMaterials()     │  Custom Hook
-├─────────────────────┤
-│  1. useState()      │  Initialize state
-│  2. useEffect()     │  Run on mount
-│  3. onSnapshot()    │  Subscribe to Firebase
-│  4. return data     │  Provide to component
-└─────────────────────┘
-         │
-         │ Real-time listener
-         │
-         ▼
-    Firebase Firestore
-    'materials' collection
-    
-When data changes in Firebase:
-    ▼
-onSnapshot() callback fires
-    ▼
-setState() updates component
-    ▼
-Component re-renders with new data
-```
-
----
-
-## 🎭 Component Lifecycle
-
-```
-1. USER NAVIGATES TO PAGE
-   └─▶ Next.js loads page.tsx
-
-2. COMPONENT MOUNTS
-   └─▶ React calls component function
-       └─▶ Hooks initialize (useState, useEffect)
-
-3. DATA FETCHING STARTS
-   └─▶ useFirestore hooks subscribe to Firebase
-       └─▶ Loading state = true
-
-4. FIREBASE RESPONDS
-   └─▶ Data arrives from Firestore
-       └─▶ useState updates with data
-       └─▶ Loading state = false
-
-5. COMPONENT RENDERS
-   └─▶ UI displays with data
-       └─▶ Charts, tables, cards visible
-
-6. USER INTERACTION
-   └─▶ User clicks button, fills form
-       └─▶ Event handler fires
-       └─▶ Data sent to Firebase
-
-7. REAL-TIME UPDATE
-   └─▶ Firebase broadcasts change
-       └─▶ onSnapshot() receives update
-       └─▶ State updates automatically
-       └─▶ UI re-renders
-
-8. USER NAVIGATES AWAY
-   └─▶ Component unmounts
-       └─▶ Firebase listeners unsubscribe
-       └─▶ Cleanup complete
-```
-
----
-
-## 🔐 Security Architecture (Future)
-
-```
-┌─────────────────────────────────────────────┐
-│           CURRENT (Demo Mode)                │
-├─────────────────────────────────────────────┤
-│  • Open access (no login)                   │
-│  • Firebase rules: public read/write        │
-│  • Credentials in .env.local                │
-└─────────────────────────────────────────────┘
-                    │
-                    │ Future enhancement
-                    ▼
-┌─────────────────────────────────────────────┐
-│        FUTURE (Production Mode)              │
-├─────────────────────────────────────────────┤
-│  1. USER AUTHENTICATION                     │
-│     └─▶ Firebase Auth (email/password)     │
-│                                             │
-│  2. ROLE-BASED ACCESS                       │
-│     ├─▶ Admin: Full access                 │
-│     ├─▶ Manager: Create/edit               │
-│     └─▶ Viewer: Read only                  │
-│                                             │
-│  3. FIRESTORE RULES                         │
-│     └─▶ Check auth.uid                     │
-│     └─▶ Validate role                      │
-│                                             │
-│  4. AUDIT LOGGING                           │
-│     └─▶ Track who changed what             │
-└─────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│                      src/app/api/                           │
+│                   (Next.js API Routes)                      │
+└────────────────────────────────────────────────────────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        ▼                  ▼                  ▼
+   hugo/route.ts     hugo/actions/route.ts  hugo/email/route.ts
+   (AI Chat API)     (Database Actions)     (Supplier Emails)
+        │                  │                  │
+        ▼                  ▼                  ▼
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ LangChain +     │ │ Firebase Admin  │ │ Resend API      │
+│ MegaLLM         │ │ SDK             │ │                 │
+│ OCR.space API   │ │ CRUD Operations │ │ Email Delivery  │
+└─────────────────┘ └─────────────────┘ └─────────────────┘
 ```
 
 ---
@@ -417,7 +480,8 @@ Component re-renders with new data
        │ Connected to...
        ▼
 ┌──────────────┐
-│ Vercel       │  Automatic deployment
+│ Vercel /     │  Automatic deployment
+│ Netlify      │
 └──────┬───────┘
        │ Builds & deploys
        ▼
@@ -425,131 +489,11 @@ Component re-renders with new data
 │ Production   │  https://voltway-erp.vercel.app
 └──────────────┘
 
-Connected to:
-    Firebase (Database)
-    OpenAI (AI - future)
-    Slack (Notifications - future)
-```
-
----
-
-## 📱 Responsive Design Architecture
-
-```
-┌─────────────────────────────────────────────┐
-│           MOBILE (< 640px)                   │
-├─────────────────────────────────────────────┤
-│  📱 Single column layout                    │
-│  ├─ Hamburger menu                          │
-│  ├─ Stacked cards                           │
-│  └─ Scrollable tables                       │
-└─────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────┐
-│         TABLET (640px - 1024px)              │
-├─────────────────────────────────────────────┤
-│  📱 Two column layout                       │
-│  ├─ Collapsible sidebar                     │
-│  ├─ Grid cards (2 cols)                     │
-│  └─ Responsive tables                       │
-└─────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────┐
-│          DESKTOP (> 1024px)                  │
-├─────────────────────────────────────────────┤
-│  🖥️ Full layout with sidebar               │
-│  ├─ Fixed sidebar navigation                │
-│  ├─ Grid cards (4 cols)                     │
-│  ├─ Full-width tables                       │
-│  └─ Advanced visualizations                 │
-└─────────────────────────────────────────────┘
-
-Powered by: Tailwind CSS breakpoints
-```
-
----
-
-## 🔄 State Management Flow
-
-```
-┌────────────────────────────────────────┐
-│      Component Local State              │
-│      (useState)                         │
-├────────────────────────────────────────┤
-│  • Form inputs                          │
-│  • Modal open/close                     │
-│  • Temporary UI state                   │
-└────────────────────────────────────────┘
-                │
-                ▼
-┌────────────────────────────────────────┐
-│      Firebase Realtime State            │
-│      (Firestore listeners)              │
-├────────────────────────────────────────┤
-│  • Materials data                       │
-│  • Stock levels                         │
-│  • Orders                               │
-│  • Suppliers                            │
-└────────────────────────────────────────┘
-                │
-                ▼
-┌────────────────────────────────────────┐
-│      Computed State                     │
-│      (Derived from Firebase data)       │
-├────────────────────────────────────────┤
-│  • KPIs (calculated)                    │
-│  • Stock status (critical/low/healthy)  │
-│  • Alerts (filtered)                    │
-│  • Charts data (processed)              │
-└────────────────────────────────────────┘
-
-No Redux needed! 
-Firebase + hooks = Simple state management
-```
-
----
-
-## 🎯 Feature Dependency Map
-
-```
-                    CORE FOUNDATION
-                         │
-        ┌────────────────┼────────────────┐
-        ▼                ▼                ▼
-   Firebase        Next.js App      Tailwind CSS
-   Database          Router            Styling
-        │                │                │
-        └────────────────┼────────────────┘
-                         │
-                         ▼
-                   DATA LAYER
-                         │
-        ┌────────────────┼────────────────┐
-        ▼                ▼                ▼
-   Materials        Stock Levels      Suppliers
-   Collection       Collection        Collection
-        │                │                │
-        └────────────────┼────────────────┘
-                         │
-                         ▼
-                  BUSINESS LOGIC
-                         │
-        ┌────────────────┼────────────────┐
-        ▼                ▼                ▼
-   Stock Status    Reorder Logic     Alerts
-   Calculation     Automation        System
-        │                │                │
-        └────────────────┼────────────────┘
-                         │
-                         ▼
-                  USER INTERFACE
-                         │
-        ┌────────────────┼────────────────┐
-        ▼                ▼                ▼
-   Dashboard       Inventory         Orders
-   Page            Page              Page
+Connected Services:
+    🔥 Firebase (Database)
+    🤖 MegaLLM (AI/LLM)
+    📄 OCR.space (Document Processing)
+    📧 Resend (Email)
 ```
 
 ---
@@ -557,23 +501,33 @@ Firebase + hooks = Simple state management
 ## 🧩 Integration Points
 
 ```
-┌─────────────────────────────────────────────┐
-│         VOLTWAY ERP (Current)                │
-└─────────────────────────────────────────────┘
-                    │
-                    │ Integrated with:
-                    │
-        ┌───────────┼───────────┐
-        ▼           ▼           ▼
-   Firebase     Material     Dark Mode
-   Firestore    Symbols      Support
-                   │
-                   │ Future integrations:
-                   │
-        ┌──────────┼──────────┐
-        ▼          ▼          ▼
-   OpenAI API   Slack      Email
-   (Hugo AI)    Notifs     Parser
+┌─────────────────────────────────────────────────────────────┐
+│                    VOLTWAY ERP INTEGRATIONS                  │
+└─────────────────────────────────────────────────────────────┘
+                           │
+    ┌──────────────────────┼──────────────────────┐
+    ▼                      ▼                      ▼
+┌────────────┐      ┌────────────┐        ┌────────────┐
+│ Firebase   │      │ MegaLLM    │        │ OCR.space  │
+│ Firestore  │      │ (LLM API)  │        │ (OCR API)  │
+├────────────┤      ├────────────┤        ├────────────┤
+│ Database   │      │ AI Chat    │        │ PDF OCR    │
+│ Real-time  │      │ 120B Model │        │ Image OCR  │
+│ Scalable   │      │ LangChain  │        │ Free Tier  │
+└────────────┘      └────────────┘        └────────────┘
+    │                      │                      │
+    └──────────────────────┼──────────────────────┘
+                           │
+    ┌──────────────────────┼──────────────────────┐
+    ▼                      ▼                      ▼
+┌────────────┐      ┌────────────┐        ┌────────────┐
+│ Resend     │      │ jsPDF      │        │ Theme      │
+│ (Email)    │      │ (Export)   │        │ (Light/Dark│
+├────────────┤      ├────────────┤        ├────────────┤
+│ Supplier   │      │ PDF Export │        │ localStorage│
+│ Emails     │      │ Reports    │        │ Persisted  │
+│ Reorders   │      │ Formatted  │        │ Toggle     │
+└────────────┘      └────────────┘        └────────────┘
 ```
 
 ---
@@ -601,102 +555,15 @@ Firebase + hooks = Simple state management
 │  5. Memoization                        │
 │     └─▶ useMemo() for expensive calcs  │
 │                                        │
-│  6. Debouncing                         │
-│     └─▶ Search inputs delay queries    │
+│  6. Theme Persistence                  │
+│     └─▶ localStorage for instant load  │
+│                                        │
+│  7. OCR API Caching                    │
+│     └─▶ Efficient document processing  │
 │                                        │
 └────────────────────────────────────────┘
 
-Result: Fast, responsive app even with large datasets!
-```
-
----
-
-## 🎨 Design System Hierarchy
-
-```
-┌─────────────────────────────────────┐
-│        DESIGN TOKENS                 │
-├─────────────────────────────────────┤
-│  Colors:                             │
-│  • Primary: Indigo                   │
-│  • Success: Green                    │
-│  • Warning: Yellow                   │
-│  • Danger: Red                       │
-│  • Neutral: Gray/Slate               │
-│                                      │
-│  Typography:                         │
-│  • System Font Stack                 │
-│  • Material Symbols Icons            │
-│                                      │
-│  Spacing:                            │
-│  • Tailwind scale (0.25rem units)    │
-└─────────────────────────────────────┘
-                │
-                ▼
-┌─────────────────────────────────────┐
-│       BASE COMPONENTS                │
-├─────────────────────────────────────┤
-│  • Button                            │
-│  • Input                             │
-│  • Card                              │
-│  • Table                             │
-│  • Modal                             │
-└─────────────────────────────────────┘
-                │
-                ▼
-┌─────────────────────────────────────┐
-│     COMPOSITE COMPONENTS             │
-├─────────────────────────────────────┤
-│  • KPI Card                          │
-│  • Data Table                        │
-│  • Alert Box                         │
-│  • Progress Bar                      │
-└─────────────────────────────────────┘
-                │
-                ▼
-┌─────────────────────────────────────┐
-│        PAGE LAYOUTS                  │
-├─────────────────────────────────────┤
-│  • Dashboard                         │
-│  • Inventory                         │
-│  • Orders                            │
-└─────────────────────────────────────┘
-```
-
----
-
-## 🔍 Debugging Architecture
-
-```
-Problem Occurs
-      │
-      ▼
-┌──────────────────┐
-│ Browser Console  │  F12 → Console tab
-│ Check for errors │  Red messages = errors
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ React DevTools   │  Inspect component state
-│ Check state      │  Props, hooks, context
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Network Tab      │  Check Firebase calls
-│ Check API calls  │  Response times, errors
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Firebase Console │  Check database directly
-│ Verify data      │  Collections, documents
-└────────┬─────────┘
-         │
-         ▼
-   Problem Found!
-   └─▶ Fix code → Test → Deploy
+Result: Fast, responsive app with AI capabilities!
 ```
 
 ---
@@ -709,20 +576,38 @@ Problem Occurs
 │                                                                │
 │  1. Opens browser → types URL                                 │
 │  2. Next.js serves HTML + JavaScript                          │
-│  3. React app initializes                                     │
+│  3. React app initializes with theme preference               │
 │  4. Firebase hooks fetch data                                 │
 │  5. UI renders with live data                                 │
-│  6. User creates order                                        │
-│  7. Data saved to Firebase                                    │
-│  8. Real-time update propagates                               │
-│  9. All connected users see change                            │
-│  10. System generates alerts                                  │
-│  11. Hugo AI analyzes (future)                                │
-│  12. Recommendation shown to user                             │
-│  13. User makes informed decision                             │
-│  14. Production runs smoothly! ✅                             │
+│  6. User navigates to Hugo AI                                 │
+│  7. Uploads PDF document                                      │
+│  8. OCR.space extracts text                                   │
+│  9. LangChain + MegaLLM processes query                       │
+│  10. AI provides insights from document                       │
+│  11. User asks to reorder parts                               │
+│  12. Hugo sends email to supplier                             │
+│  13. Database updated automatically                           │
+│  14. All connected users see changes                          │
+│  15. Production runs smoothly! ✅                             │
 └───────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 🛠️ Technology Stack Summary
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Frontend** | Next.js 16.1 | React framework with App Router |
+| **UI Library** | React 19 | Component-based UI |
+| **Styling** | Tailwind CSS 4 | Utility-first CSS |
+| **Language** | TypeScript 5 | Type-safe JavaScript |
+| **Database** | Firebase Firestore | Real-time NoSQL database |
+| **AI/LLM** | MegaLLM + LangChain | Conversational AI |
+| **OCR** | OCR.space API | Document text extraction |
+| **PDF Export** | jsPDF | Generate PDF reports |
+| **Email** | Resend API | Supplier communications |
+| **Theme** | Custom Context | Light/Dark mode toggle |
 
 ---
 
@@ -730,5 +615,5 @@ Problem Occurs
 
 ---
 
-**Last Updated**: December 29, 2024  
-**Version**: 1.0
+**Last Updated**: December 30, 2024  
+**Version**: 2.0 (Hugo AI + OCR Integration)
