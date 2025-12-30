@@ -715,3 +715,6 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) for 
 [Report Bug](https://github.com/vedantgpt/Amulate-vedant-shubh/issues) • [Request Feature](https://github.com/vedantgpt/Amulate-vedant-shubh/issues) • [Documentation](https://github.com/vedantgpt/Amulate-vedant-shubh/wiki)
 
 </div>
+
+
+#Authors: Vedant & Shubh
