@@ -135,84 +135,269 @@ export default function HugoPage() {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    // Helper function to parse markdown tables
+    const parseMarkdownTable = (lines: string[], startIndex: number): { rows: string[][]; endIndex: number } | null => {
+        const rows: string[][] = [];
+        let i = startIndex;
+
+        while (i < lines.length && lines[i].includes('|')) {
+            const row = lines[i].trim();
+            // Skip separator rows (|---|---|)
+            if (!row.match(/^\|[\s\-:|]+\|$/)) {
+                const cells = row.split('|').filter(cell => cell.trim() !== '').map(cell => cell.trim());
+                if (cells.length > 0) {
+                    rows.push(cells);
+                }
+            }
+            i++;
+        }
+
+        return rows.length > 0 ? { rows, endIndex: i } : null;
+    };
+
+    // Helper function to draw table in PDF
+    const drawPDFTable = (doc: jsPDF, rows: string[][], startY: number, margin: number, maxWidth: number): number => {
+        if (rows.length === 0) return startY;
+
+        const colCount = rows[0].length;
+        const colWidth = maxWidth / colCount;
+        const cellPadding = 3;
+        const rowHeight = 8;
+        let currentY = startY;
+
+        rows.forEach((row, rowIndex) => {
+            // Check for page break
+            if (currentY > 265) {
+                doc.addPage();
+                currentY = 25;
+            }
+
+            const isHeader = rowIndex === 0;
+
+            // Draw row background
+            if (isHeader) {
+                doc.setFillColor(79, 70, 229); // Indigo header
+            } else if (rowIndex % 2 === 0) {
+                doc.setFillColor(241, 245, 249); // Alternate light gray
+            } else {
+                doc.setFillColor(255, 255, 255); // White
+            }
+            doc.rect(margin, currentY - 5, maxWidth, rowHeight, 'F');
+
+            // Draw cell borders
+            doc.setDrawColor(203, 213, 225);
+            doc.setLineWidth(0.2);
+            row.forEach((_, cellIndex) => {
+                doc.rect(margin + cellIndex * colWidth, currentY - 5, colWidth, rowHeight);
+            });
+
+            // Draw cell content
+            row.forEach((cell, cellIndex) => {
+                const cleanCell = cell.replace(/\*\*/g, '').replace(/⚠️/g, '(!)')
+                doc.setFontSize(isHeader ? 9 : 8);
+                if (isHeader) {
+                    doc.setTextColor(255, 255, 255); // White text for header
+                    doc.setFont('helvetica', 'bold');
+                } else if (cell.includes('Critical')) {
+                    doc.setTextColor(185, 28, 28); // Red for critical
+                    doc.setFont('helvetica', 'normal');
+                } else if (cell.includes('Low')) {
+                    doc.setTextColor(180, 83, 9); // Amber for low
+                    doc.setFont('helvetica', 'normal');
+                } else {
+                    doc.setTextColor(51, 65, 85); // Slate for normal
+                    doc.setFont('helvetica', 'normal');
+                }
+
+                const truncated = cleanCell.length > 20 ? cleanCell.substring(0, 18) + '...' : cleanCell;
+                doc.text(truncated, margin + cellIndex * colWidth + cellPadding, currentY);
+            });
+
+            currentY += rowHeight;
+        });
+
+        return currentY + 5;
+    };
+
     // Export conversation to PDF
     const exportToPDF = () => {
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
-        const margin = 20;
+        const margin = 15;
         const maxWidth = pageWidth - 2 * margin;
         let yPosition = 20;
-        const lineHeight = 7;
 
-        // Title
-        doc.setFontSize(20);
-        doc.setTextColor(79, 70, 229); // Indigo
-        doc.text('Hugo AI - Conversation Report', margin, yPosition);
-        yPosition += 12;
+        // Header background
+        doc.setFillColor(79, 70, 229);
+        doc.rect(0, 0, pageWidth, 40, 'F');
 
-        // Subtitle with date
-        doc.setFontSize(10);
-        doc.setTextColor(100, 116, 139); // Slate
-        doc.text(`Generated: ${new Date().toLocaleString()}`, margin, yPosition);
-        doc.text(`Voltway ERP - Operations Hub`, pageWidth - margin, yPosition, { align: 'right' });
-        yPosition += 10;
+        // Header text
+        doc.setFontSize(22);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Hugo AI', margin, 18);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(200, 200, 255);
+        doc.text('Conversation Report', margin, 28);
 
-        // Divider line
-        doc.setDrawColor(226, 232, 240);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 10;
+        // Date on header
+        doc.setFontSize(9);
+        doc.setTextColor(200, 200, 255);
+        doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - margin, 18, { align: 'right' });
+        doc.text('Voltway ERP - Operations Hub', pageWidth - margin, 28, { align: 'right' });
+
+        yPosition = 50;
+
+        // Summary box
+        const userMsgCount = messages.filter(m => m.role === 'user').length;
+        const aiMsgCount = messages.filter(m => m.role === 'assistant').length;
+
+        doc.setFillColor(241, 245, 249);
+        doc.roundedRect(margin, yPosition, maxWidth, 18, 3, 3, 'F');
+        doc.setFontSize(9);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`📊 Summary: ${userMsgCount} questions • ${aiMsgCount} responses • ${messages.length} total messages`, margin + 5, yPosition + 11);
+        yPosition += 28;
 
         // Messages
-        doc.setFontSize(11);
-        messages.forEach((msg) => {
-            // Check if we need a new page
-            if (yPosition > 270) {
+        messages.forEach((msg, msgIndex) => {
+            if (yPosition > 260) {
                 doc.addPage();
                 yPosition = 20;
             }
 
-            // Role label
-            doc.setFontSize(9);
+            // Message header with role badge
             if (msg.role === 'user') {
-                doc.setTextColor(14, 165, 233); // Cyan
-                doc.text('You', margin, yPosition);
+                doc.setFillColor(14, 165, 233);
+                doc.roundedRect(margin, yPosition - 4, 35, 7, 2, 2, 'F');
+                doc.setFontSize(8);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.text('You', margin + 3, yPosition + 1);
             } else {
-                doc.setTextColor(99, 102, 241); // Indigo
-                doc.text('Hugo AI', margin, yPosition);
+                doc.setFillColor(99, 102, 241);
+                doc.roundedRect(margin, yPosition - 4, 45, 7, 2, 2, 'F');
+                doc.setFontSize(8);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Hugo AI', margin + 3, yPosition + 1);
             }
-            yPosition += 5;
 
-            // Message content - clean markdown
-            doc.setFontSize(10);
-            doc.setTextColor(15, 23, 42); // Slate-900
-            const cleanContent = msg.content
-                .replace(/\*\*(.*?)\*\*/g, '$1')
-                .replace(/\*(.*?)\*/g, '$1')
-                .replace(/• /g, '- ');
+            // Timestamp
+            doc.setFontSize(7);
+            doc.setTextColor(148, 163, 184);
+            doc.setFont('helvetica', 'normal');
+            doc.text(msg.timestamp.toLocaleTimeString(), pageWidth - margin, yPosition + 1, { align: 'right' });
 
-            const lines = doc.splitTextToSize(cleanContent, maxWidth);
-            lines.forEach((line: string) => {
-                if (yPosition > 280) {
+            yPosition += 10;
+
+            // Parse and render message content
+            const contentLines = msg.content.split('\n');
+            let lineIndex = 0;
+
+            while (lineIndex < contentLines.length) {
+                if (yPosition > 270) {
                     doc.addPage();
                     yPosition = 20;
                 }
-                doc.text(line, margin, yPosition);
-                yPosition += lineHeight;
-            });
-            yPosition += 5;
+
+                const line = contentLines[lineIndex];
+
+                // Check for table
+                if (line.includes('|') && line.trim().startsWith('|')) {
+                    const tableResult = parseMarkdownTable(contentLines, lineIndex);
+                    if (tableResult) {
+                        yPosition = drawPDFTable(doc, tableResult.rows, yPosition, margin, maxWidth);
+                        lineIndex = tableResult.endIndex;
+                        continue;
+                    }
+                }
+
+                const trimmed = line.trim();
+
+                if (!trimmed) {
+                    yPosition += 3;
+                    lineIndex++;
+                    continue;
+                }
+
+                // Headers (bold text)
+                if ((trimmed.startsWith('**') && trimmed.endsWith('**')) || trimmed.endsWith(':')) {
+                    yPosition += 2;
+                    doc.setFontSize(11);
+                    doc.setTextColor(79, 70, 229);
+                    doc.setFont('helvetica', 'bold');
+                    const headerText = trimmed.replace(/\*\*/g, '').replace(/:$/, '');
+                    doc.text(headerText, margin, yPosition);
+                    doc.setDrawColor(79, 70, 229);
+                    doc.setLineWidth(0.5);
+                    doc.line(margin, yPosition + 2, margin + doc.getTextWidth(headerText), yPosition + 2);
+                    yPosition += 8;
+                    lineIndex++;
+                    continue;
+                }
+
+                // Bullet points
+                if (trimmed.startsWith('•') || trimmed.startsWith('-')) {
+                    const bulletText = trimmed.replace(/^[•\-]\s*/, '').replace(/\*\*/g, '');
+                    doc.setFontSize(9);
+                    doc.setTextColor(51, 65, 85);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFillColor(99, 102, 241);
+                    doc.circle(margin + 2, yPosition - 1, 1, 'F');
+                    const wrapped = doc.splitTextToSize(bulletText, maxWidth - 10);
+                    wrapped.forEach((w: string) => {
+                        if (yPosition > 275) { doc.addPage(); yPosition = 20; }
+                        doc.text(w, margin + 7, yPosition);
+                        yPosition += 5;
+                    });
+                    lineIndex++;
+                    continue;
+                }
+
+                // Regular text
+                doc.setFontSize(9);
+                doc.setTextColor(51, 65, 85);
+                doc.setFont('helvetica', 'normal');
+                const cleanText = trimmed.replace(/\*\*/g, '');
+                const wrapped = doc.splitTextToSize(cleanText, maxWidth);
+                wrapped.forEach((w: string) => {
+                    if (yPosition > 275) { doc.addPage(); yPosition = 20; }
+                    doc.text(w, margin, yPosition);
+                    yPosition += 5;
+                });
+                lineIndex++;
+            }
+
+            // Divider between messages
+            if (msgIndex < messages.length - 1) {
+                yPosition += 3;
+                doc.setDrawColor(226, 232, 240);
+                doc.setLineWidth(0.3);
+                doc.line(margin, yPosition, pageWidth - margin, yPosition);
+                yPosition += 8;
+            }
         });
 
-        // Footer
+        // Footer on all pages
         const pageCount = doc.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
+            doc.setFillColor(248, 250, 252);
+            doc.rect(0, 282, pageWidth, 15, 'F');
             doc.setFontSize(8);
             doc.setTextColor(148, 163, 184);
             doc.text(
-                `Page ${i} of ${pageCount} | Voltway ERP - Hugo AI`,
-                pageWidth / 2,
-                290,
-                { align: 'center' }
+                `Page ${i} of ${pageCount}`,
+                margin,
+                289
+            );
+            doc.text(
+                'Voltway ERP - Hugo AI Procurement Assistant',
+                pageWidth - margin,
+                289,
+                { align: 'right' }
             );
         }
 
@@ -223,120 +408,167 @@ export default function HugoPage() {
     const exportSingleMessageToPDF = (msg: Message) => {
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
-        const margin = 20;
+        const margin = 15;
         const maxWidth = pageWidth - 2 * margin;
         let yPosition = 20;
-        const lineHeight = 7;
 
-        // Header with gradient-like effect
+        // Full-width header background
         doc.setFillColor(79, 70, 229);
-        doc.roundedRect(margin, 15, pageWidth - 2 * margin, 35, 3, 3, 'F');
-        doc.setFontSize(22);
+        doc.rect(0, 0, pageWidth, 45, 'F');
+
+        // Header text
+        doc.setFontSize(24);
         doc.setTextColor(255, 255, 255);
-        doc.text('Hugo AI', margin + 10, 32);
-        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Hugo AI', margin, 20);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
         doc.setTextColor(200, 200, 255);
-        doc.text('Procurement Intelligence Report', margin + 10, 42);
-        yPosition = 65;
+        doc.text('Procurement Intelligence Report', margin, 32);
 
-        // Subtitle
-        doc.setFontSize(10);
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Generated: ${new Date().toLocaleString()}`, margin, yPosition);
-        doc.text(`Voltway ERP`, pageWidth - margin, yPosition, { align: 'right' });
-        yPosition += 8;
-
-        // Divider
-        doc.setDrawColor(226, 232, 240);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 12;
-
-        // Label
+        // Date on header
         doc.setFontSize(9);
-        doc.setTextColor(99, 102, 241);
-        doc.text('AI Analysis', margin, yPosition);
-        yPosition += 6;
+        doc.setTextColor(200, 200, 255);
+        doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - margin, 20, { align: 'right' });
+        doc.text('Voltway ERP - Operations Hub', pageWidth - margin, 32, { align: 'right' });
 
-        // Content - parse line by line for structure
+        yPosition = 58;
+
+        // Report type badge
+        doc.setFillColor(241, 245, 249);
+        doc.roundedRect(margin, yPosition - 5, maxWidth, 16, 3, 3, 'F');
+        doc.setFillColor(99, 102, 241);
+        doc.roundedRect(margin + 3, yPosition - 2, 55, 10, 2, 2, 'F');
+        doc.setFontSize(8);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text('AI ANALYSIS', margin + 8, yPosition + 4);
+        doc.setFontSize(9);
+        doc.setTextColor(71, 85, 105);
+        doc.setFont('helvetica', 'normal');
+        doc.text(msg.timestamp.toLocaleString(), pageWidth - margin - 5, yPosition + 4, { align: 'right' });
+
+        yPosition += 20;
+
+        // Content - parse line by line with table support
         const contentLines = msg.content.split('\n');
-        contentLines.forEach((line) => {
-            const trimmed = line.trim();
-            if (!trimmed) { yPosition += 4; return; }
+        let lineIndex = 0;
 
-            if (yPosition > 275) { doc.addPage(); yPosition = 25; }
+        while (lineIndex < contentLines.length) {
+            if (yPosition > 265) {
+                doc.addPage();
+                yPosition = 25;
+            }
+
+            const line = contentLines[lineIndex];
+
+            // Check for table
+            if (line.includes('|') && line.trim().startsWith('|')) {
+                const tableResult = parseMarkdownTable(contentLines, lineIndex);
+                if (tableResult) {
+                    yPosition = drawPDFTable(doc, tableResult.rows, yPosition, margin, maxWidth);
+                    lineIndex = tableResult.endIndex;
+                    continue;
+                }
+            }
+
+            const trimmed = line.trim();
+
+            if (!trimmed) {
+                yPosition += 4;
+                lineIndex++;
+                continue;
+            }
 
             // Headers (bold text or ending with colon)
             if ((trimmed.startsWith('**') && trimmed.endsWith('**')) || trimmed.endsWith(':')) {
-                yPosition += 3;
-                doc.setFontSize(11);
+                yPosition += 4;
+                doc.setFontSize(12);
                 doc.setTextColor(79, 70, 229);
+                doc.setFont('helvetica', 'bold');
                 const headerText = trimmed.replace(/\*\*/g, '').replace(/:$/, '');
                 doc.text(headerText, margin, yPosition);
                 doc.setDrawColor(79, 70, 229);
-                doc.setLineWidth(0.3);
+                doc.setLineWidth(0.5);
                 doc.line(margin, yPosition + 2, margin + doc.getTextWidth(headerText), yPosition + 2);
-                yPosition += 9;
-                return;
+                yPosition += 10;
+                lineIndex++;
+                continue;
             }
 
             // Bullet points
-            if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
-                const bulletText = trimmed.replace(/^[•\-\*]\s*/, '').replace(/\*\*/g, '');
+            if (trimmed.startsWith('•') || trimmed.startsWith('-')) {
+                const bulletText = trimmed.replace(/^[•\-]\s*/, '').replace(/\*\*/g, '');
                 doc.setFontSize(10);
-                doc.setTextColor(15, 23, 42);
-                doc.setFillColor(14, 165, 233);
-                doc.circle(margin + 2, yPosition - 1.5, 1.2, 'F');
-                const wrapped = doc.splitTextToSize(bulletText, maxWidth - 10);
+                doc.setTextColor(51, 65, 85);
+                doc.setFont('helvetica', 'normal');
+                doc.setFillColor(99, 102, 241);
+                doc.circle(margin + 2.5, yPosition - 1, 1.2, 'F');
+                const wrapped = doc.splitTextToSize(bulletText, maxWidth - 12);
                 wrapped.forEach((w: string) => {
-                    if (yPosition > 280) { doc.addPage(); yPosition = 25; }
+                    if (yPosition > 275) { doc.addPage(); yPosition = 25; }
                     doc.text(w, margin + 8, yPosition);
                     yPosition += 5.5;
                 });
-                return;
+                lineIndex++;
+                continue;
             }
 
             // Numbered items
             const numMatch = trimmed.match(/^(\d+)\.\s*(.+)/);
             if (numMatch) {
                 doc.setFillColor(79, 70, 229);
-                doc.circle(margin + 3, yPosition - 1, 3, 'F');
-                doc.setFontSize(7);
+                doc.circle(margin + 3.5, yPosition - 1, 3.5, 'F');
+                doc.setFontSize(8);
                 doc.setTextColor(255, 255, 255);
-                doc.text(numMatch[1], margin + 3, yPosition + 0.3, { align: 'center' });
+                doc.setFont('helvetica', 'bold');
+                doc.text(numMatch[1], margin + 3.5, yPosition + 0.5, { align: 'center' });
                 doc.setFontSize(10);
-                doc.setTextColor(15, 23, 42);
-                const wrapped = doc.splitTextToSize(numMatch[2].replace(/\*\*/g, ''), maxWidth - 12);
+                doc.setTextColor(51, 65, 85);
+                doc.setFont('helvetica', 'normal');
+                const wrapped = doc.splitTextToSize(numMatch[2].replace(/\*\*/g, ''), maxWidth - 15);
                 wrapped.forEach((w: string) => {
-                    if (yPosition > 280) { doc.addPage(); yPosition = 25; }
-                    doc.text(w, margin + 10, yPosition);
+                    if (yPosition > 275) { doc.addPage(); yPosition = 25; }
+                    doc.text(w, margin + 12, yPosition);
                     yPosition += 5.5;
                 });
                 yPosition += 2;
-                return;
+                lineIndex++;
+                continue;
             }
 
             // Regular text
             doc.setFontSize(10);
             doc.setTextColor(51, 65, 85);
-            const wrapped = doc.splitTextToSize(trimmed.replace(/\*\*/g, ''), maxWidth);
+            doc.setFont('helvetica', 'normal');
+            const cleanText = trimmed.replace(/\*\*/g, '');
+            const wrapped = doc.splitTextToSize(cleanText, maxWidth);
             wrapped.forEach((w: string) => {
-                if (yPosition > 280) { doc.addPage(); yPosition = 25; }
+                if (yPosition > 275) { doc.addPage(); yPosition = 25; }
                 doc.text(w, margin, yPosition);
                 yPosition += 5.5;
             });
-        });
+            lineIndex++;
+        }
 
-        // Footer
+        // Footer on all pages
         const pageCount = doc.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
+            doc.setFillColor(248, 250, 252);
+            doc.rect(0, 282, pageWidth, 15, 'F');
             doc.setFontSize(8);
             doc.setTextColor(148, 163, 184);
             doc.text(
-                `Page ${i} of ${pageCount} | Voltway ERP - Hugo AI`,
-                pageWidth / 2,
-                290,
-                { align: 'center' }
+                `Page ${i} of ${pageCount}`,
+                margin,
+                289
+            );
+            doc.text(
+                'Voltway ERP - Hugo AI Procurement Assistant',
+                pageWidth - margin,
+                289,
+                { align: 'right' }
             );
         }
 
@@ -663,25 +895,84 @@ export default function HugoPage() {
 
     // Format message content with markdown-like styling
     const formatContent = (content: string) => {
-        return content
-            .split('\n')
-            .map((line, i) => {
-                // Bold
-                line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                // Bullet points
-                if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')) {
-                    return `<li key="${i}" class="ml-4">${line.replace(/^[•\-\*]\s*/, '')}</li>`;
+        const lines = content.split('\n');
+        const result: string[] = [];
+        let i = 0;
+
+        while (i < lines.length) {
+            let line = lines[i];
+
+            // Check for table start (line with pipes)
+            if (line.includes('|') && line.trim().startsWith('|')) {
+                const tableRows: string[] = [];
+
+                // Collect all table rows
+                while (i < lines.length && lines[i].includes('|')) {
+                    const row = lines[i].trim();
+                    // Skip separator rows (|---|---|)
+                    if (!row.match(/^\|[\s\-:|]+\|$/)) {
+                        tableRows.push(row);
+                    }
+                    i++;
                 }
-                // Headers
-                if (line.startsWith('###')) {
-                    return `<h4 key="${i}" class="font-semibold mt-2">${line.replace('### ', '')}</h4>`;
+
+                if (tableRows.length > 0) {
+                    // Build HTML table
+                    let tableHtml = '<div class="overflow-x-auto my-3"><table class="w-full text-sm border-collapse">';
+
+                    tableRows.forEach((row, rowIndex) => {
+                        const cells = row.split('|').filter(cell => cell.trim() !== '');
+                        const isHeader = rowIndex === 0;
+
+                        if (isHeader) {
+                            tableHtml += '<thead class="bg-gradient-to-r from-indigo-500/10 to-purple-500/10"><tr>';
+                            cells.forEach(cell => {
+                                const cellContent = cell.trim().replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                tableHtml += `<th class="px-3 py-2 text-left font-semibold text-indigo-700 dark:text-indigo-300 border-b-2 border-indigo-200 dark:border-indigo-700">${cellContent}</th>`;
+                            });
+                            tableHtml += '</tr></thead><tbody>';
+                        } else {
+                            const rowClass = (rowIndex % 2 === 0)
+                                ? 'bg-slate-50/50 dark:bg-slate-800/30'
+                                : 'bg-white dark:bg-slate-900/50';
+                            tableHtml += `<tr class="${rowClass} hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">`;
+                            cells.forEach((cell, cellIndex) => {
+                                let cellContent = cell.trim().replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                // Style critical/low status badges
+                                cellContent = cellContent.replace(/⚠️\s*Critical/g, '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-xs font-medium">⚠️ Critical</span>');
+                                cellContent = cellContent.replace(/⚠️\s*Low/g, '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium">⚠️ Low</span>');
+                                tableHtml += `<td class="px-3 py-2 border-b border-slate-200 dark:border-slate-700 ${cellIndex === 0 ? 'font-medium text-slate-800 dark:text-slate-200' : 'text-slate-600 dark:text-slate-300'}">${cellContent}</td>`;
+                            });
+                            tableHtml += '</tr>';
+                        }
+                    });
+
+                    tableHtml += '</tbody></table></div>';
+                    result.push(tableHtml);
                 }
-                if (line.startsWith('##')) {
-                    return `<h3 key="${i}" class="font-bold mt-3">${line.replace('## ', '')}</h3>`;
-                }
-                return line ? `<p key="${i}">${line}</p>` : '<br/>';
-            })
-            .join('');
+                continue;
+            }
+
+            // Bold
+            line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Bullet points
+            if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')) {
+                result.push(`<li key="${i}" class="ml-4">${line.replace(/^[•\-\*]\s*/, '')}</li>`);
+            }
+            // Headers
+            else if (line.startsWith('###')) {
+                result.push(`<h4 key="${i}" class="font-semibold mt-2">${line.replace('### ', '')}</h4>`);
+            }
+            else if (line.startsWith('##')) {
+                result.push(`<h3 key="${i}" class="font-bold mt-3">${line.replace('## ', '')}</h3>`);
+            }
+            else {
+                result.push(line ? `<p key="${i}">${line}</p>` : '<br/>');
+            }
+            i++;
+        }
+
+        return result.join('');
     };
 
     return (
