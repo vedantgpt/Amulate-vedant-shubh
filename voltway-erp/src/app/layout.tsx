@@ -26,9 +26,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={`${inter.variable} font-sans antialiased bg-[#f7f7f7] dark:bg-[#191919] text-slate-900 dark:text-slate-100 min-h-screen overflow-hidden flex`}>
+      <body className={`${inter.variable} font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen overflow-hidden flex`}>
         <Sidebar />
-        <main className="flex-1 h-screen overflow-y-auto bg-[#f7f7f7] dark:bg-[#191919] flex flex-col">
+        <main className="flex-1 h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950 flex flex-col">
           {children}
         </main>
       </body>

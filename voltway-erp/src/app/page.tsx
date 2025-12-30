@@ -65,13 +65,15 @@ export default function Dashboard() {
         {/* KPI Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Daily Build Rate */}
-          <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] p-5">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Daily Build Rate</p>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">142</p>
               </div>
-              <span className="material-symbols-outlined text-[#595959] p-2 bg-slate-100 dark:bg-slate-800 rounded">precision_manufacturing</span>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                <span className="material-symbols-outlined text-white text-lg">precision_manufacturing</span>
+              </div>
             </div>
             <div className="flex items-center gap-1 mt-2">
               <span className="material-symbols-outlined text-green-500 text-[16px]">trending_up</span>
@@ -81,7 +83,8 @@ export default function Dashboard() {
           </div>
 
           {/* Active Stockouts */}
-          <div className="bg-white dark:bg-[#262626] rounded border border-l-4 border-l-red-500 border-y-gray-200 border-r-gray-200 dark:border-y-[#404040] dark:border-r-[#404040] p-5">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-red-500 to-orange-500 rounded-r"></div>
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Active Stockouts</p>
@@ -93,13 +96,15 @@ export default function Dashboard() {
           </div>
 
           {/* On-Time Delivery */}
-          <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] p-5">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">On-Time Delivery</p>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">94.5%</p>
               </div>
-              <span className="material-symbols-outlined text-[#595959] p-2 bg-slate-100 dark:bg-slate-800 rounded">local_shipping</span>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <span className="material-symbols-outlined text-white text-lg">local_shipping</span>
+              </div>
             </div>
             <div className="flex items-center gap-1 mt-2">
               <span className="material-symbols-outlined text-amber-500 text-[16px]">trending_down</span>
@@ -108,7 +113,7 @@ export default function Dashboard() {
           </div>
 
           {/* Sales Orders */}
-          <div className="bg-white dark:bg-[#262626] rounded border border-gray-200 dark:border-[#404040] p-5">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Total Sales Units</p>

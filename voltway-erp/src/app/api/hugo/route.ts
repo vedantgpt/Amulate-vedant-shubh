@@ -1,7 +1,7 @@
-// Hugo AI API Route - LangChain with Groq (AI-Powered Actions)
+// Hugo AI API Route - LangChain with MegaLLM (AI-Powered Actions)
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ChatGroq } from '@langchain/groq';
+import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
@@ -123,45 +123,68 @@ When sending emails, use the email field from the supplier data.
 - S2_KIDS: Kids variant (smaller components)`;
 
 export async function POST(request: NextRequest) {
-    try {
-        const { message, databaseContext, conversationHistory } = await request.json();
+  try {
+    const { message, databaseContext, conversationHistory, file } = await request.json();
 
-        if (!message) {
-            return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    if (!message) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    }
+
+    // Process uploaded file content
+    let fileContext = '';
+    if (file) {
+      if (file.type === 'pdf') {
+        try {
+          // Decode base64 and extract text from PDF
+          const pdfBuffer = Buffer.from(file.content, 'base64');
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          const pdfParse = require('pdf-parse');
+          const pdfData = await pdfParse(pdfBuffer);
+          fileContext = `\n\n📄 **Uploaded Document: ${file.name}**\n\n---\n${pdfData.text.slice(0, 8000)}\n---\n`;
+        } catch (err) {
+          console.error('PDF parsing error:', err);
+          fileContext = `\n\n📄 **Uploaded Document: ${file.name}** (PDF parsing failed - please describe the document content)\n`;
         }
+      } else if (file.type === 'image') {
+        fileContext = `\n\n🖼️ **Uploaded Image: ${file.name}**\n(Note: Image analysis is limited. Please describe what you see or want to know about the image.)\n`;
+      }
+    }
 
-        const apiKey = process.env.GROQ_API_KEY;
-        if (!apiKey) {
-            return NextResponse.json({ error: 'Groq API key not configured' }, { status: 500 });
+    const apiKey = process.env.MEGALLM_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'MegaLLM API key not configured. Add MEGALLM_API_KEY to .env.local' }, { status: 500 });
+    }
+
+    // Initialize LangChain with MegaLLM (OpenAI-compatible)
+    const model = new ChatOpenAI({
+      apiKey: apiKey,
+      modelName: 'openai-gpt-oss-120b',
+      temperature: 0.2,
+      maxTokens: 2048,
+      configuration: {
+        baseURL: 'https://ai.megallm.io/v1',
+      },
+    });
+
+    // Build messages with conversation context
+    const messages: (SystemMessage | HumanMessage | AIMessage)[] = [
+      new SystemMessage(HUGO_SYSTEM_PROMPT),
+    ];
+
+    // Add conversation history for context (last 6 messages)
+    if (conversationHistory?.length > 0) {
+      const recentHistory = conversationHistory.slice(-6);
+      for (const msg of recentHistory) {
+        if (msg.role === 'user') {
+          messages.push(new HumanMessage(msg.content));
+        } else {
+          messages.push(new AIMessage(msg.content));
         }
+      }
+    }
 
-        // Initialize LangChain with Groq
-        const model = new ChatGroq({
-            apiKey,
-            model: 'llama-3.3-70b-versatile',
-            temperature: 0.2,
-            maxTokens: 2048,
-        });
-
-        // Build messages with conversation context
-        const messages: (SystemMessage | HumanMessage | AIMessage)[] = [
-            new SystemMessage(HUGO_SYSTEM_PROMPT),
-        ];
-
-        // Add conversation history for context (last 6 messages)
-        if (conversationHistory?.length > 0) {
-            const recentHistory = conversationHistory.slice(-6);
-            for (const msg of recentHistory) {
-                if (msg.role === 'user') {
-                    messages.push(new HumanMessage(msg.content));
-                } else {
-                    messages.push(new AIMessage(msg.content));
-                }
-            }
-        }
-
-        // Build context with database data
-        const contextPrompt = `
+    // Build context with database data
+    const contextPrompt = `
 ## Real-Time Firebase Database Context
 
 ### Quick Stats
@@ -178,44 +201,44 @@ ${databaseContext?.jsonData || 'No data available'}
 
 ---
 ## User Request
-${message}
+${message}${fileContext}
 
 If this is a database action request (add, update, delete, create, change, modify, mark as delivered, etc.), include the action JSON block. Otherwise, just provide a helpful response.`;
 
-        messages.push(new HumanMessage(contextPrompt));
+    messages.push(new HumanMessage(contextPrompt));
 
-        // Get AI response using LangChain
-        const response = await model.invoke(messages);
-        const outputParser = new StringOutputParser();
-        const text = await outputParser.invoke(response);
+    // Get AI response using LangChain
+    const response = await model.invoke(messages);
+    const outputParser = new StringOutputParser();
+    const text = await outputParser.invoke(response);
 
-        // Check if response contains an action block
-        const actionMatch = text.match(/```action\s*([\s\S]*?)```/);
-        let action = null;
-        let cleanResponse = text;
+    // Check if response contains an action block
+    const actionMatch = text.match(/```action\s*([\s\S]*?)```/);
+    let action = null;
+    let cleanResponse = text;
 
-        if (actionMatch) {
-            try {
-                action = JSON.parse(actionMatch[1].trim());
-                // Remove the action block from the visible response
-                cleanResponse = text.replace(/```action\s*[\s\S]*?```/g, '').trim();
-            } catch (e) {
-                console.error('Failed to parse action JSON:', e);
-            }
-        }
-
-        return NextResponse.json({
-            response: cleanResponse,
-            action: action,
-            model: 'llama-3.3-70b-versatile',
-            provider: 'Groq + LangChain',
-            timestamp: new Date().toISOString(),
-        });
-    } catch (error: any) {
-        console.error('Hugo API Error:', error);
-        return NextResponse.json(
-            { error: error.message || 'Failed to process request' },
-            { status: 500 }
-        );
+    if (actionMatch) {
+      try {
+        action = JSON.parse(actionMatch[1].trim());
+        // Remove the action block from the visible response
+        cleanResponse = text.replace(/```action\s*[\s\S]*?```/g, '').trim();
+      } catch (e) {
+        console.error('Failed to parse action JSON:', e);
+      }
     }
+
+    return NextResponse.json({
+      response: cleanResponse,
+      action: action,
+      model: 'openai-gpt-oss-120b',
+      provider: 'MegaLLM + LangChain',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Hugo API Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to process request' },
+      { status: 500 }
+    );
+  }
 }

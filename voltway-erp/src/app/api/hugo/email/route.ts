@@ -4,36 +4,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
 export async function POST(request: NextRequest) {
-    try {
-        const {
-            supplierEmail,
-            supplierName,
-            partId,
-            partName,
-            currentStock,
-            minStock,
-            reorderQuantity,
-            notes,
-        } = await request.json();
+  try {
+    const {
+      supplierEmail,
+      supplierName,
+      partId,
+      partName,
+      currentStock,
+      minStock,
+      reorderQuantity,
+      notes,
+    } = await request.json();
 
-        const apiKey = process.env.RESEND_API_KEY;
-        if (!apiKey) {
-            return NextResponse.json(
-                { error: 'Resend API key not configured. Add RESEND_API_KEY to .env.local' },
-                { status: 500 }
-            );
-        }
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'Resend API key not configured. Add RESEND_API_KEY to .env.local' },
+        { status: 500 }
+      );
+    }
 
-        if (!supplierEmail) {
-            return NextResponse.json(
-                { error: 'Supplier email is required' },
-                { status: 400 }
-            );
-        }
+    if (!supplierEmail) {
+      return NextResponse.json(
+        { error: 'Supplier email is required' },
+        { status: 400 }
+      );
+    }
 
-        const resend = new Resend(apiKey);
+    const resend = new Resend(apiKey);
 
-        const emailHtml = `
+    const emailHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -102,36 +102,36 @@ export async function POST(request: NextRequest) {
     </div>
     <div class="footer">
       <p style="margin: 0;">This is an automated email from Voltway ERP powered by Hugo AI.</p>
-      <p style="margin: 8px 0 0 0;">© 2024 Voltway Electric Scooters</p>
+      <p style="margin: 8px 0 0 0;">© 2025 Voltway Electric Scooters</p>
     </div>
   </div>
 </body>
 </html>
     `;
 
-        const { data, error } = await resend.emails.send({
-            from: 'Voltway Procurement <onboarding@resend.dev>',
-            to: [supplierEmail],
-            subject: `🔧 Reorder Request: ${partId} - ${partName} (${reorderQuantity} units)`,
-            html: emailHtml,
-        });
+    const { data, error } = await resend.emails.send({
+      from: 'Voltway Procurement <onboarding@resend.dev>',
+      to: [supplierEmail],
+      subject: `🔧 Reorder Request: ${partId} - ${partName} (${reorderQuantity} units)`,
+      html: emailHtml,
+    });
 
-        if (error) {
-            console.error('Resend Error:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: `Email sent successfully to ${supplierEmail}`,
-            emailId: data?.id,
-            timestamp: new Date().toISOString(),
-        });
-    } catch (error: any) {
-        console.error('Email API Error:', error);
-        return NextResponse.json(
-            { error: error.message || 'Failed to send email' },
-            { status: 500 }
-        );
+    if (error) {
+      console.error('Resend Error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    return NextResponse.json({
+      success: true,
+      message: `Email sent successfully to ${supplierEmail}`,
+      emailId: data?.id,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Email API Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to send email' },
+      { status: 500 }
+    );
+  }
 }
