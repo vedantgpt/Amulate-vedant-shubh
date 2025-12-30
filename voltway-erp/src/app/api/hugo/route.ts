@@ -154,13 +154,13 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       return NextResponse.json({ error: 'MegaLLM API key not configured. Add MEGALLM_API_KEY to .env.local' }, { status: 500 });
     }
-    
+
     // Initialize LangChain with MegaLLM (OpenAI-compatible)
     const model = new ChatOpenAI({
       apiKey: apiKey,
       modelName: 'openai-gpt-oss-120b',
       temperature: 0.2,
-      maxTokens: 2048,
+      maxTokens: 16384,
       configuration: {
         baseURL: 'https://ai.megallm.io/v1',
       },
