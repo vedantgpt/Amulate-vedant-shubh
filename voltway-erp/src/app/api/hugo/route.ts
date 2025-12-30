@@ -135,8 +135,52 @@ export async function POST(request: NextRequest) {
 
     if (file) {
       if (file.type === 'pdf') {
-        // For PDFs, ask user to upload as image for OCR
-        fileContext = `\n\n📄 **Uploaded Document: ${file.name}**\n\nI received your PDF document. For best text extraction, please:\n1. Take a screenshot of the PDF pages\n2. Upload as JPG/PNG image for OCR processing\n\nOr copy-paste the text content directly into the chat.\n`;
+        try {
+          // Use OCR.space API for PDF text extraction
+          const formData = new FormData();
+          formData.append('base64Image', `data:application/pdf;base64,${file.content}`);
+          formData.append('language', 'eng');
+          formData.append('isOverlayRequired', 'false');
+          formData.append('filetype', 'PDF');
+          formData.append('detectOrientation', 'true');
+          formData.append('scale', 'true');
+          formData.append('OCREngine', '2'); // More accurate engine
+          formData.append('isTable', 'true'); // Better table detection
+
+          const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+            method: 'POST',
+            headers: {
+              'apikey': 'K83918858588957', // Free tier API key
+            },
+            body: formData,
+          });
+
+          const ocrResult = await ocrResponse.json();
+
+          if (ocrResult.ParsedResults && ocrResult.ParsedResults.length > 0) {
+            // Combine text from all pages
+            const allPagesText = ocrResult.ParsedResults
+              .map((page: { ParsedText?: string }, idx: number) => {
+                const pageText = page.ParsedText?.trim() || '';
+                return pageText ? `--- Page ${idx + 1} ---\n${pageText}` : '';
+              })
+              .filter((text: string) => text.length > 0)
+              .join('\n\n');
+
+            if (allPagesText.length > 20) {
+              fileContext = `\n\n📄 **Uploaded PDF: ${file.name}** (OCR Processed)\n\n📝 **Extracted Text:**\n${allPagesText.slice(0, 12000)}\n---\n\nPlease analyze the above extracted text from the PDF and `;
+            } else {
+              fileContext = `\n\n📄 **Uploaded PDF: ${file.name}**\n\n⚠️ OCR could not extract readable text from this PDF. The document might be:\n- A scanned document with poor quality\n- Password protected\n- Contains only images or charts\n\nPlease try:\n1. Take a screenshot of specific pages\n2. Upload as JPG/PNG image\n3. Or copy-paste the text content\n`;
+            }
+          } else {
+            const errorMessage = ocrResult.ErrorMessage || ocrResult.ErrorDetails || 'Unknown error';
+            console.error('PDF OCR API error:', errorMessage);
+            fileContext = `\n\n📄 **Uploaded PDF: ${file.name}**\n\n⚠️ PDF processing encountered an issue: ${errorMessage}\n\nPlease try uploading as an image (screenshot) instead.\n`;
+          }
+        } catch (err) {
+          console.error('PDF OCR error:', err);
+          fileContext = `\n\n📄 **Uploaded PDF: ${file.name}**\n\nPDF processing failed. Please try:\n1. Take a screenshot of the PDF pages\n2. Upload as JPG/PNG image\n`;
+        }
       } else if (file.type === 'image') {
         try {
           // Use OCR.space free API for text extraction
