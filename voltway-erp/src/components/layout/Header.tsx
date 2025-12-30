@@ -1,5 +1,7 @@
 'use client';
 
+import ThemeToggle from '../ThemeToggle';
+
 interface HeaderProps {
     title: string;
 }
@@ -35,6 +37,9 @@ export default function Header({ title }: HeaderProps) {
                         ⌘K
                     </kbd>
                 </div>
+
+                {/* Theme Toggle */}
+                <ThemeToggle />
 
                 {/* Actions */}
                 <button className="p-2 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-white transition-all">

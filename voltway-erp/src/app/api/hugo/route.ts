@@ -132,21 +132,49 @@ export async function POST(request: NextRequest) {
 
     // Process uploaded file content
     let fileContext = '';
+
     if (file) {
       if (file.type === 'pdf') {
-        try {
-          // Decode base64 and extract text from PDF
-          const pdfBuffer = Buffer.from(file.content, 'base64');
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const pdfParse = require('pdf-parse');
-          const pdfData = await pdfParse(pdfBuffer);
-          fileContext = `\n\n📄 **Uploaded Document: ${file.name}**\n\n---\n${pdfData.text.slice(0, 8000)}\n---\n`;
-        } catch (err) {
-          console.error('PDF parsing error:', err);
-          fileContext = `\n\n📄 **Uploaded Document: ${file.name}** (PDF parsing failed - please describe the document content)\n`;
-        }
+        // For PDFs, ask user to upload as image for OCR
+        fileContext = `\n\n📄 **Uploaded Document: ${file.name}**\n\nI received your PDF document. For best text extraction, please:\n1. Take a screenshot of the PDF pages\n2. Upload as JPG/PNG image for OCR processing\n\nOr copy-paste the text content directly into the chat.\n`;
       } else if (file.type === 'image') {
-        fileContext = `\n\n🖼️ **Uploaded Image: ${file.name}**\n(Note: Image analysis is limited. Please describe what you see or want to know about the image.)\n`;
+        try {
+          // Use OCR.space free API for text extraction
+          const formData = new FormData();
+          formData.append('base64Image', `data:image/png;base64,${file.content}`);
+          formData.append('language', 'eng');
+          formData.append('isOverlayRequired', 'false');
+          formData.append('detectOrientation', 'true');
+          formData.append('scale', 'true');
+          formData.append('OCREngine', '2'); // More accurate engine
+
+          const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+            method: 'POST',
+            headers: {
+              'apikey': 'K83918858588957', // Free tier API key
+            },
+            body: formData,
+          });
+
+          const ocrResult = await ocrResponse.json();
+
+          if (ocrResult.ParsedResults && ocrResult.ParsedResults.length > 0) {
+            const extractedText = ocrResult.ParsedResults[0].ParsedText?.trim() || '';
+
+            if (extractedText.length > 10) {
+              fileContext = `\n\n🖼️ **Uploaded Image: ${file.name}** (OCR Processed)\n\n📝 **Extracted Text:**\n---\n${extractedText.slice(0, 10000)}\n---\n\nPlease analyze the above extracted text and `;
+            } else {
+              fileContext = `\n\n🖼️ **Uploaded Image: ${file.name}**\n\n⚠️ OCR could not extract readable text from this image. The image might be:\n- A photo without text\n- Low quality/blurry\n- Text in unsupported language\n\nPlease describe what you see or try uploading a clearer image.\n`;
+            }
+          } else {
+            const errorMessage = ocrResult.ErrorMessage || 'Unknown error';
+            console.error('OCR API error:', errorMessage);
+            fileContext = `\n\n🖼️ **Uploaded Image: ${file.name}**\n\n⚠️ OCR processing encountered an issue. Please describe the image content or try again.\n`;
+          }
+        } catch (err) {
+          console.error('OCR error:', err);
+          fileContext = `\n\n🖼️ **Uploaded Image: ${file.name}**\n\nOCR processing failed. Please describe the image content.\n`;
+        }
       }
     }
 
@@ -205,6 +233,7 @@ ${message}${fileContext}
 
 If this is a database action request (add, update, delete, create, change, modify, mark as delivered, etc.), include the action JSON block. Otherwise, just provide a helpful response.`;
 
+    // Add user message with context
     messages.push(new HumanMessage(contextPrompt));
 
     // Get AI response using LangChain
