@@ -175,6 +175,66 @@ export async function POST(request: NextRequest) {
                 });
             }
 
+            case 'update_all_supplier_emails': {
+                // Bulk update all supplier emails
+                if (!data || !data.email) {
+                    return NextResponse.json({ error: 'Email is required for bulk update' }, { status: 400 });
+                }
+
+                const suppliersRef = collection(db, 'suppliers');
+                const snapshot = await getDocs(suppliersRef);
+
+                if (snapshot.empty) {
+                    return NextResponse.json({ error: 'No suppliers found in database' }, { status: 404 });
+                }
+
+                let updatedCount = 0;
+                const updatePromises = snapshot.docs.map(async (docSnapshot) => {
+                    const docRef = doc(db, 'suppliers', docSnapshot.id);
+                    await updateDoc(docRef, {
+                        email: data.email,
+                        updated_at: new Date().toISOString(),
+                    });
+                    updatedCount++;
+                });
+
+                await Promise.all(updatePromises);
+
+                return NextResponse.json({
+                    success: true,
+                    message: `Successfully updated email to "${data.email}" for ${updatedCount} suppliers`,
+                    action: 'update_all_supplier_emails',
+                    count: updatedCount,
+                });
+            }
+
+            case 'update_supplier': {
+                // Update a single supplier by supplier_id
+                if (!searchValue) {
+                    return NextResponse.json({ error: 'supplier_id required' }, { status: 400 });
+                }
+
+                const suppliersRef = collection(db, 'suppliers');
+                const q = query(suppliersRef, where('supplier_id', '==', searchValue));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    return NextResponse.json({ error: `No supplier found with supplier_id=${searchValue}` }, { status: 404 });
+                }
+
+                const docRef = doc(db, 'suppliers', snapshot.docs[0].id);
+                await updateDoc(docRef, {
+                    ...data,
+                    updated_at: new Date().toISOString(),
+                });
+
+                return NextResponse.json({
+                    success: true,
+                    message: `Successfully updated supplier ${searchValue}`,
+                    action: 'update_supplier',
+                });
+            }
+
             default:
                 return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
         }
