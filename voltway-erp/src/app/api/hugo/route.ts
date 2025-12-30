@@ -25,7 +25,7 @@ Format your response like this when an action is needed:
 
 \`\`\`action
 {
-  "type": "add|update|delete|update_stock|mark_delivered|send_email",
+  "type": "add|update|delete|update_stock|mark_delivered|send_email|update_all_supplier_emails|update_supplier",
   "collection": "materials|stock_levels|dispatch_parameters|material_orders|sales_orders|suppliers",
   "data": { ... fields to add/update ... },
   "searchField": "field_name to find document",
@@ -106,9 +106,22 @@ Format your response like this when an action is needed:
 }
 \`\`\`
 
+### Bulk update all supplier emails:
+\`\`\`action
+{
+  "type": "update_all_supplier_emails",
+  "collection": "suppliers",
+  "data": { "email": "newemail@example.com" },
+  "description": "Update email for all suppliers to newemail@example.com"
+}
+\`\`\`
+
 ## Supplier Data
 Suppliers have these fields: supplier_id, supplier_name, part_id, lead_time_days, reliability_score, unit_price, email, phone.
 When sending emails, use the email field from the supplier data.
+
+**CRITICAL**: When updating suppliers, ALWAYS use searchField="supplier_id" (NOT "id"). Example: to update supplier "SupA", use searchValue="SupA" with searchField="supplier_id".
+For bulk updates to ALL suppliers (like changing all emails), use type="update_all_supplier_emails" instead.
 
 ## Response Style for Non-Action Queries
 1. Be CONCISE - use bullet points, not paragraphs
